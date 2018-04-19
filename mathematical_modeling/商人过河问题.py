@@ -1,7 +1,5 @@
 # 问题： 三名商人各带一个随从过河，一只小船只能容纳两个人，随从们约定，只要在河的任何一岸，一旦随从人数多于商人人数就杀人越货，但是商人们知道了他们的约定，并且如何过河的大权掌握在商人们手中，商人们该采取怎样的策略才能安全过河呢？ # noqa
 
-# 创建允许状态集合
-
 from random import randint
 
 
@@ -25,7 +23,7 @@ class Boat(object):
 
     '''
     允许状态集合：满足两个岸边商人数量为0或者商人数量大于随从数量
-    返回状态集合（dict）
+    @return dict
     '''
 
     def allowSet(self):
@@ -42,7 +40,7 @@ class Boat(object):
 
     '''
     允许决策集合：所有符合船最大容纳量的策略
-    返回策略集合（dict）
+    @return dict
     '''
 
     def allowActions(self):
@@ -65,6 +63,7 @@ class Boat(object):
     成环后避免再次经过
     检验目前的点是否已经经过？若经过，则检验使用过的决策表，将在此点已经
     有点奇怪，检验成环并排除很复杂
+    `未完成`
     '''
 
     def noCircle(self, current):
@@ -73,7 +72,6 @@ class Boat(object):
     '''
     禁止使用的决策集合：对允许决策进一步削弱，禁止在特定点使用特定决策
     flag为方向：1.正向（奇数）2.逆向（偶数）
-    无返回
     '''
 
     def forbidMethods(self, current, flag, method):
@@ -82,6 +80,7 @@ class Boat(object):
 
     '''
     结合船的限制与禁止表得到的针对特定点的允许策略集合
+    @return dict
     '''
 
     def avaliableMethods(self, current, flag):
