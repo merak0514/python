@@ -29,16 +29,16 @@ class Boat(object):
     '''
 
     def allowSet(self):
-        allowset = []
+        allow_set = []
         for i in range(self.merchants + 1):
             for j in range(self.minors + 1):
                 # print([i, j])
                 if i == 0 or i == self.merchants:
-                    allowset.append((i, j))
+                    allow_set.append((i, j))
                 elif i >= j and (self.merchants -
                                  i) >= (self.minors - j):
-                    allowset.append((i, j))
-        return allowset
+                    allow_set.append((i, j))
+        return allow_set
 
     '''
     允许决策集合：所有符合船最大容纳量的策略
@@ -97,8 +97,8 @@ class Boat(object):
     '''solution'''
 
     def solve(self):
-        allowset = self.allowSet()
-        # print(allowset,'hhhhhhh')
+        allow_set = self.allowSet()
+        # print(allow_set,'hhhhhhh')
         current = (self.merchants, self.minors)
         # print(current)
         count = 1  # 第n次渡船
@@ -113,7 +113,7 @@ class Boat(object):
                 temp = (current[0] + ((-1) ** count) * method[0],
                         current[1] + ((-1) ** count) * method[1])   # 尝试执行
                 # print(temp)
-                if temp in allowset:    # 若尝试执行后结果在允许的状态表中，则实际执行
+                if temp in allow_set:    # 若尝试执行后结果在允许的状态表中，则实际执行
                     current = temp
                     print('%d 个商人，%d 个随从，在第%d 次渡河的船上' %
                           (method[0], method[1], count))
@@ -127,10 +127,10 @@ class Boat(object):
 
 
 def main():
-    boat = Boat(6, 6, 4)
-    allowset = boat.allowSet()
+    boat = Boat(3, 3, 2)
+    allow_set = boat.allowSet()
     print("允许状态集合：")
-    print(allowset)
+    print(allow_set)
 
     allow_actions_set = boat.allowActions()
     print("允许决策集合：")
