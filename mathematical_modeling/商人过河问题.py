@@ -9,52 +9,89 @@ class Boat(object):
     """商人过河"""
 
     def __init__(self, merchants, minors, capacity):
+        '''
+        分别为：原始岸边商人的数量、随从的数量；船的容纳量；禁止使用的策略
+        '''
         # super(Boat, self).__init__()
         self.merchants = merchants
         self.minors = minors
         self.capacity = capacity
-        self.used_method = []
+        self.forbid_methods = []
+        self.used_methods = []
 
         print('Initialized:', merchants, 'merchants and',
               minors, 'minors; capacity:', capacity)
 
-    '''allowset'''
+    '''
+    允许状态集合：满足两个岸边商人数量为0或者商人数量大于随从数量
+    返回状态集合（dict）
+    '''
 
     def allowSet(self):
         allowset = []
-        for merchants_here in range(self.merchants + 1):
-            for minors_here in range(self.minors + 1):
-                # print([merchants_here, minors_here])
-                if merchants_here == 0 or merchants_here == self.merchants:
-                    allowset.append((merchants_here, minors_here))
-                elif merchants_here >= minors_here and (self.merchants -
-                                                        merchants_here) >= (self.minors - minors_here):
-                    allowset.append((merchants_here, minors_here))
+        for i in range(self.merchants + 1):
+            for j in range(self.minors + 1):
+                # print([i, j])
+                if i == 0 or i == self.merchants:
+                    allowset.append((i, j))
+                elif i >= j and (self.merchants -
+                                 i) >= (self.minors - j):
+                    allowset.append((i, j))
         return allowset
 
-    '''allow_action'''
+    '''
+    允许决策集合：所有符合船最大容纳量的策略
+    返回策略集合（dict）
+    '''
 
-    def allowAction(self):
-        allow_action = []
+    def allowActions(self):
+        allow_actions = []
         for merchant_num in range(self.capacity + 1):
             for minor_num in range(self.capacity + 1 - merchant_num):
                 if minor_num + merchant_num != 0:
-                    allow_action.append((merchant_num, minor_num))
-        return allow_action
+                    allow_actions.append((merchant_num, minor_num))
+        return allow_actions
 
-    def usedMethod(self, current, flag, move):
-        self.used_method.append((current, flag, move))
-        print("used_method:", self.used_method)
+    '''
+    使用过的决策集合：包括在任意一点向任意方向（此岸/对岸）决策的集合
+    flag为方向：1.正向（奇数）2.逆向（偶数）
+    '''
 
-    def avaliableMethod(self, current, flag):
-        allow_action_set = self.allowAction()
+    def usedMethods(self, current, flag, method):
+        self.used_methods.append((current, flag, method))
+
+    '''
+    成环后避免再次经过
+    检验目前的点是否已经经过？若经过，则检验使用过的决策表，将在此点已经
+    有点奇怪，检验成环并排除很复杂
+    '''
+
+    def noCircle(self, current):
+        pass
+
+    '''
+    禁止使用的决策集合：对允许决策进一步削弱，禁止在特定点使用特定决策
+    flag为方向：1.正向（奇数）2.逆向（偶数）
+    无返回
+    '''
+
+    def forbidMethods(self, current, flag, method):
+        self.forbid_methods.append((current, flag, method))
+        print("forbid_methods:", self.forbid_methods)
+
+    '''
+    结合船的限制与禁止表得到的针对特定点的允许策略集合
+    '''
+
+    def avaliableMethods(self, current, flag):
+        allow_actions_set = self.allowActions()
         # print('input current aM:', current)
-        for a, b, move in self.used_method:
-            # print(current, move)
+        for a, b, method in self.forbid_methods:
+            # print(current, method)
             if a == current and b == flag:
-                allow_action_set.remove(move)
-        print('allow_action_set aM:', allow_action_set)
-        return allow_action_set
+                allow_actions_set.remove(method)
+        print('allow_actions_set aM:', allow_actions_set)
+        return allow_actions_set
 
     '''solution'''
 
@@ -65,35 +102,36 @@ class Boat(object):
         # print(current)
         count = 1  # 第n次渡船
         while current != (0, 0):
-            allow_action_set = self.avaliableMethod(current, count % 2)
+            allow_actions_set = self.avaliableMethods(current, count % 2)
 
-            move = allow_action_set[randint(
-                0, len(allow_action_set) - 1)]  # 随机采用一种行动方式
-            # self.usedMethod(current, count % 2, move)
-            print(move)
-            temp = (current[0] + ((-1) ** count) * move[0],
-                    current[1] + ((-1) ** count) * move[1])
+            method = allow_actions_set[randint(
+                0, len(allow_actions_set) - 1)]  # 随机采用一种行动方式
+            # self.usedMethods(current, count % 2, method)
+            print(method)
+            temp = (current[0] + ((-1) ** count) * method[0],
+                    current[1] + ((-1) ** count) * method[1])
             print(temp)
             if temp in allowset:
                 current = temp
-                print('%d 个商人，%d 个随从，在第%d 次渡河的船上' % (move[0], move[1], count))
+                print('%d 个商人，%d 个随从，在第%d 次渡河的船上' %
+                      (method[0], method[1], count))
                 count += 1
             else:
-                self.usedMethod(current, count % 2, move)
+                self.forbidMethods(current, count % 2, method)
 
 
 '''主方法'''
 
 
 def main():
-    boat = Boat(3, 3, 2)
+    boat = Boat(4, 4, 2)
     allowset = boat.allowSet()
     print("允许状态集合：")
     print(allowset)
 
-    allow_action_set = boat.allowAction()
+    allow_actions_set = boat.allowActions()
     print("允许决策集合：")
-    print(allow_action_set)
+    print(allow_actions_set)
 
     boat.solve()
 
