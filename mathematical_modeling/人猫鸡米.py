@@ -14,6 +14,7 @@ class Bank(object):
         self.capacity = capacity
         self.here = (human, cat, chick, rice)
         self.there = (0, 0, 0, 0)
+        self.forbiden_methods = []
 
         print('Initialized: %d human, %d cat, %d chick, %d rice, capacity: %d' % (
             human, cat, chick, rice, capacity))
@@ -52,6 +53,13 @@ class Bank(object):
 
     def availableMethods(self):
         return self.allowMethods()
+
+    '''
+    禁止使用策略集合
+    禁止直接原路返回
+    '''
+    def forbidenMethods():
+        pass
 
     '''
     上船过河

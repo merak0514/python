@@ -16,7 +16,8 @@ class Boat(object):
         self.capacity = capacity
         self.forbidden_methods = []
         self.used_methods = []
-        self.last_operator = (0, 0)
+        self.last_operator = (0, 0)  # 上一次的操作
+        self.solution = []
 
         print('Initialized:', merchants, 'merchants and',
               minors, 'minors; capacity:', capacity)
@@ -90,11 +91,9 @@ class Boat(object):
             # print(current, method)
             if a == current and b == flag:
                 allow_actions_set.remove(method)
-        try:
+        if (self.last_operator[0], self.last_operator[1]) in allow_actions_set:
             allow_actions_set.remove(
                 (self.last_operator[0], self.last_operator[1]))
-        except:
-            pass
         # print('allow_actions_set aM:', allow_actions_set)
         return allow_actions_set
 
@@ -106,28 +105,30 @@ class Boat(object):
         # print(current)
         current = (self.merchants, self.minors)
         while current != (0, 0):
-            print('circle1')
+            # print('circle1')
             current = (self.merchants, self.minors)
             count = 1  # 第n次渡船
             self.last_operator = (0, 0)
+            self.solution = []
             while current != (0, 0):
                 allow_actions_set = self.avaliableMethods(
                     current, count % 2)   # 允许采用的方法
-                print(allow_actions_set)
+                # print(allow_actions_set)
                 try:
                     method = allow_actions_set[randint(
                         0, len(allow_actions_set) - 1)]  # 随机采用一种行动方式
-                except:
+                except:                                  # 无方法可以采用时跳出循环
                     break
                 # self.usedMethods(current, count % 2, method)
-                print(method)
+                # print(method)
                 temp = (current[0] + ((-1) ** count) * method[0],
                         current[1] + ((-1) ** count) * method[1])   # 尝试执行
                 # print(temp)
                 if temp in allow_set:    # 若尝试执行后结果在允许的状态表中，则实际执行
                     current = temp
-                    print('%d 个商人，%d 个随从，在第%d 次渡河的船上' %
-                          (method[0], method[1], count))
+                    # print('%d 个商人，%d 个随从，在第%d 次渡河的船上' %
+                    #       (method[0], method[1], count))
+                    self.solution.append((method[0], method[1], count))
                     count += 1
                     self.last_operator = method
                 else:
@@ -138,7 +139,7 @@ class Boat(object):
 
 
 def main():
-    boat = Boat(3, 3, 2)
+    boat = Boat(6, 6, 4)
     allow_set = boat.allowSet()
     print("允许状态集合：")
     print(allow_set)
@@ -148,6 +149,10 @@ def main():
     print(allow_actions_set)
 
     boat.solve()
+    for method in boat.solution:
+        print('%d 个商人，%d 个随从，在第%d 次渡河的船上' %
+              (method[0], method[1], method[2]))
+    # print(boat.solution)
 
 
 main()
