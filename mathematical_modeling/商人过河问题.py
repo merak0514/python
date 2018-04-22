@@ -14,7 +14,7 @@ class Boat(object):
         self.merchants = merchants
         self.minors = minors
         self.capacity = capacity
-        self.forbid_methods = []
+        self.forbidden_methods = []
         self.used_methods = []
         self.last_operator = (0, 0)
 
@@ -74,9 +74,9 @@ class Boat(object):
     flag为方向：1.正向（奇数）2.逆向（偶数）
     '''
 
-    def forbidMethods(self, current, flag, method):
-        self.forbid_methods.append((current, flag, method))
-        # print("forbid_methods:", self.forbid_methods)
+    def forbiddenMethods(self, current, flag, method):
+        self.forbidden_methods.append((current, flag, method))
+        # print("forbidden_methods:", self.forbidden_methods)
 
     '''
     结合船的限制与禁止表得到的针对特定点的允许策略集合
@@ -86,10 +86,15 @@ class Boat(object):
     def avaliableMethods(self, current, flag):
         allow_actions_set = self.allowActions()
         # print('input current aM:', current)
-        for a, b, method in self.forbid_methods:
+        for a, b, method in self.forbidden_methods:
             # print(current, method)
             if a == current and b == flag:
                 allow_actions_set.remove(method)
+        try:
+            allow_actions_set.remove(
+                (self.last_operator[0], self.last_operator[1]))
+        except:
+            pass
         # print('allow_actions_set aM:', allow_actions_set)
         return allow_actions_set
 
@@ -98,17 +103,24 @@ class Boat(object):
     def solve(self):
         allow_set = self.allowSet()
         # print(allow_set,'hhhhhhh')
-        current = (self.merchants, self.minors)
         # print(current)
-        count = 1  # 第n次渡船
+        current = (self.merchants, self.minors)
         while current != (0, 0):
-            allow_actions_set = self.avaliableMethods(
-                current, count % 2)   # 允许采用的方法
-            method = allow_actions_set[randint(
-                0, len(allow_actions_set) - 1)]  # 随机采用一种行动方式
-            if method != (self.last_operator[1], self.last_operator[0]):   # 禁止直接原路返回
+            print('circle1')
+            current = (self.merchants, self.minors)
+            count = 1  # 第n次渡船
+            self.last_operator = (0, 0)
+            while current != (0, 0):
+                allow_actions_set = self.avaliableMethods(
+                    current, count % 2)   # 允许采用的方法
+                print(allow_actions_set)
+                try:
+                    method = allow_actions_set[randint(
+                        0, len(allow_actions_set) - 1)]  # 随机采用一种行动方式
+                except:
+                    break
                 # self.usedMethods(current, count % 2, method)
-                # print(method)
+                print(method)
                 temp = (current[0] + ((-1) ** count) * method[0],
                         current[1] + ((-1) ** count) * method[1])   # 尝试执行
                 # print(temp)
@@ -119,7 +131,7 @@ class Boat(object):
                     count += 1
                     self.last_operator = method
                 else:
-                    self.forbidMethods(current, count % 2, method)
+                    self.forbiddenMethods(current, count % 2, method)
 
 
 '''主方法'''
