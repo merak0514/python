@@ -7,15 +7,13 @@ class Bank(object):
     """人猫鸡米"""
 
     def __init__(self, human, cat, chick, rice, capacity):
-        self.human = human
-        self.cat = cat
-        self.chick = chick
-        self.rice = rice
-        self.capacity = capacity
+        self.CAPACITY = capacity
         self.here = (human, cat, chick, rice)
+        self.START = self.here
         self.there = (0, 0, 0, 0)
         self.forbiden_methods = []
-
+        self.last_operation = (0, 0, 0, 0)
+        self.solution = []
         print('Initialized: %d human, %d cat, %d chick, %d rice, capacity: %d' % (
             human, cat, chick, rice, capacity))
 
@@ -25,10 +23,10 @@ class Bank(object):
 
     def allowStatusSet(self):
         allow_set = []
-        for i in range(self.human + 1):
-            for j in range(self.cat + 1):
-                for k in range(self.chick + 1):
-                    for l in range(self.rice + 1):
+        for i in range(self.START[0] + 1):
+            for j in range(self.START[1] + 1):
+                for k in range(self.START[2] + 1):
+                    for l in range(self.START[3] + 1):
                         if i >= 1 or not (k >= 1 and (l >= 1 or j >= 1)):
                             allow_set.append((i, j, k, l))
         return allow_set
@@ -39,30 +37,43 @@ class Bank(object):
 
     def allowMethods(self):
         allow_methods = []
-        for i in range(self.human + 1):
-            for j in range(self.cat + 1):
-                for k in range(self.chick + 1):
-                    for l in range(self.rice + 1):
-                        if i >= 1 and (i + j + k + l) <= self.capacity:
+        for i in range(self.START[0] + 1):
+            for j in range(self.START[1] + 1):
+                for k in range(self.START[2] + 1):
+                    for l in range(self.START[3] + 1):
+                        if i >= 1 and (i + j + k + l) <= self.CAPACITY:
                             allow_methods.append((i, j, k, l))
         return allow_methods
 
     '''
     可采用策略集合
+    格式：method
     '''
 
-    def availableMethods(self):
-        return self.allowMethods()
+    def availableMethods(self, currant, flag):
+        available_methods = self.allowMethods()
+        for a, b, method in self.forbiden_methods:
+            if a == currant and b == flag:
+                if method in available_methods:
+                    available_methods.remove(method)
+        if self.last_operation in available_methods:
+            available_methods.remove(self.last_operation)
+        return available_methods
 
     '''
     禁止使用策略集合
-    禁止直接原路返回
+    格式：currant, flag, method 目前情况+操作
+    （禁止直接原路返回）
     '''
-    def forbidenMethods():
-        pass
+
+    def forbidenMethods(self, currant, flag, method):
+        if (currant, flag, method) not in self.forbiden_methods:    # 禁用已经尝试的失败方案
+            self.forbiden_methods.append((currant, flag, method))
+            # print(self.forbiden_methods)
 
     '''
     上船过河
+    @return tuple 两岸情形
     '''
 
     def goBoard(self, method, flag, currant_here, currant_there):
@@ -86,26 +97,39 @@ class Bank(object):
 
     '''
     solution
+    是否有将已进行的失败案例禁用的必要？ 有
     '''
 
-    def solution(self):
-        count = 1
+    def solve(self):
         allow_set = self.allowStatusSet()
         while self.here != (0, 0, 0, 0):
-            available_methods = self.availableMethods()
-            print(len(available_methods))
-            method = available_methods[randint(0, len(available_methods) - 1)]
-            print(method)
-            temp = self.goBoard(method, count % 2, self.here, self.there)
-            print(temp)
-            if temp[0] in allow_set or temp[1] in allow_set:
-                self.here = temp[0]
-                self.there = temp[1]
-                print('a')
-                print(self.here)
-                print('%d 个人，%d 只猫，%d 只鸡，%d 米，在第%d 次渡河的船上' %
-                      (method[0], method[1], method[2], method[3], count))
-                count += 1
+            self.here = self.START
+            self.there = (0, 0, 0, 0)
+            self.last_operation = (0, 0, 0, 0)
+            self.solution = []
+            count = 1
+            while self.here != (0, 0, 0, 0):
+                available_methods = self.availableMethods(self.here, count % 2)
+                if available_methods == []:
+                    break
+                # print(len(available_methods))
+                method = available_methods[randint(
+                    0, len(available_methods) - 1)]
+                # print(method)
+                temp = self.goBoard(method, count % 2, self.here, self.there)
+                # print(temp)
+                if temp[0] in allow_set and temp[1] in allow_set:
+                    self.here = temp[0]
+                    self.there = temp[1]
+                    # print(self.here)
+                    # print('%d 个人，%d 只猫，%d 只鸡，%d 米，在第%d 次渡河的船上' %
+                    # (method[0], method[1], method[2], method[3], count))
+                    self.solution.append((method, count))
+                    self.last_operation = method
+                    # print('last operation here', self.last_operation)
+                    count += 1
+                else:
+                    self.forbidenMethods(self.here, count % 2, method)
 
 
 def main():
@@ -119,7 +143,10 @@ def main():
     print("允许决策集合：")
     print(allow_actions_set)
 
-    bank.solution()
+    bank.solve()
+    for method in bank.solution:
+        print('%d 个人，%d 只猫，%d 只鸡，%d 米，在第%d 次渡河的船上' %
+              (method[0][0], method[0][1], method[0][2], method[0][3], method[1]))
 
 
 main()
