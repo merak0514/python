@@ -1,3 +1,5 @@
 do_not_commit/
 certificates/
 *.pyproj
+*.idea
+__pycache__/
