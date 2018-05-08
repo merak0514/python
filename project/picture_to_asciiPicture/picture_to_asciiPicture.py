@@ -4,8 +4,7 @@ from PIL import Image
 import argparse
 import re
 
-WIDTH = 60
-HEIGHT = 25
+
 picture_name = ''
 
 paser = argparse.ArgumentParser(prog="pic2ascii")
@@ -15,18 +14,26 @@ paser = argparse.ArgumentParser(prog="pic2ascii")
 # args = paser.parse_args()
 # print(args.file)
 
-ascii_char = list("$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,\"^`'. ")
+ascii_char1 = list("$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,\"^`'. ")
+ascii_char2 = list("$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxr                            . ")
 
 
 def get_picture():
-    global picture_name
+    global picture_name, width, height
+
     picture_name = input('Picture name: ')
     try:
         im = Image.open(picture_name)
     except:
         print('No such file')
         quit()
-    im = im.resize((WIDTH, HEIGHT), Image.ANTIALIAS)
+    print(im.size)
+    width = im.size[0]
+    height = im.size[1]
+    while width > 80 or height > 80:
+        width = int(width / 2)
+        height = int(height / 2)
+    im = im.resize((width, height), Image.ANTIALIAS)
     return im
 
 
@@ -34,8 +41,8 @@ def get_char(r, g, b, alpha=256):
     if alpha == 0:
         return ' '
     gray = int(0.2126 * r + 0.7152 * g + 0.0722 * b)
-    step = 257/len(ascii_char)
-    chosen_char = ascii_char[int(gray/step)]
+    step = 257/len(ascii_char1)
+    chosen_char = ascii_char1[int(gray / step)]
     return chosen_char
 # print(get_char(256,256,256))
 
@@ -43,8 +50,8 @@ def get_char(r, g, b, alpha=256):
 if __name__ == '__main__':
     im = get_picture()
     txt = '/*\n'
-    for i in range(HEIGHT):
-        for j in range(WIDTH):
+    for i in range(height):
+        for j in range(width):
             txt += get_char(*im.getpixel((j, i)))
         txt += 'x\n'
     txt += '*/\n'
@@ -52,3 +59,4 @@ if __name__ == '__main__':
 
     fhand = open(picture_name + '.cpp', 'wb')
     fhand.write(txt.encode())
+    print("Done!")
