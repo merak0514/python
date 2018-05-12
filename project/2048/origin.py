@@ -106,7 +106,7 @@ class GameField(object):
             screen.addstr(string + '\n')
 
         def draw_hor_separator():
-            line = '+' + ('+------' * self.width + '+')[1:]
+            line = '+' + ('------+' * self.width)
             separator = defaultdict(lambda: line)
             if not hasattr(draw_hor_separator, "counter"):
                 draw_hor_separator.counter = 0
