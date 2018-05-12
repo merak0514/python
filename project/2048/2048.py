@@ -8,6 +8,7 @@
 # list(zip([1,2,3],[4,5]))->[(1,4),(2,5)]
 import curses
 from random import random, choice
+
 # stdscr = curses.initscr()
 
 '''
@@ -24,7 +25,7 @@ action_dict = dict(zip(available_input, action * 2))
 
 class Game:
     def __init__(self):
-        self.rand2 = 0.8     # 随机出现2的概率
+        self.rand2 = 0.8  # 随机出现2的概率
         self.height = 4
         self.width = 4
         self.score = 0
@@ -60,28 +61,36 @@ class Game:
             print(self.field[row])
         print('\n')
 
+    def reverse(self):
+        """
+        矩阵向左转置
+        :return:
+        """
+        new = [[0 for i in range(self.width)] for j in range(self.height)]
+        for row in range(self.height):
+            for column in range(self.width):
+                new[column][row] = self.field[row][column]
+        self.field = new
+
     def move(self):
         """
-        先移动元素到合理位置
-        再把相邻元素合并
+        操作矩阵
         :return:
         """
 
         for column in range(self.width):  # 移动元素
             current_row = 0  # 记录目前转换后的数字的位置
             for row in range(self.height):
-                if self.field[row][column] == 0 or row == current_row:        # 无元素
+                if self.field[row][column] == 0 or row == current_row:  # 无元素
                     continue
-                elif self.field[row][column] == self.field[current_row][column]:
+                elif self.field[row][column] == self.field[current_row][column]:  # 相同元素
                     self.field[current_row][column] *= 2
                     self.field[row][column] = 0
-                    # current_row += 1
-                else:
+                else:  # 不同元素
                     if self.field[current_row][column] != 0:
                         current_row += 1
                     self.field[current_row][column] = self.field[row][column]
                     self.field[row][column] = 0 if row != current_row else self.field[row][column]
-                    # current_row += 1
 
                 # else:
                 #     for position in range(row - 1, 0, 1):
@@ -106,4 +115,6 @@ if __name__ == '__main__':
     game.move()
     # a = int(input('输入a'))
     game.print_field()
-        # game.place()
+    game.reverse()
+    game.print_field()
+    # game.place()
