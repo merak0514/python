@@ -29,7 +29,8 @@ class Game:
         self.width = 4
         self.score = 0
         self.high_score = 0
-        self.field = [[2, 2, 0, 0], [2, 2, 2, 0], [2, 2, 2, 2], [2, 0, 0, 2]]  # 单元测试
+        # self.field = [[2, 2, 0, 0], [2, 2, 2, 0], [2, 2, 2, 2], [2, 0, 0, 2]]  # 单元测试
+        self.field = [[2, 2, 0, 2], [2, 2, 2, 2], [2, 2, 2, 8], [2, 0, 0, 8]]  # 单元测试
         # self.field = [[0 for i in range(self.width)] for j in range(self.height)]
         self.message = ''
         # self.reset()
@@ -76,7 +77,8 @@ class Game:
                     self.field[row][column] = 0
                     # current_row += 1
                 else:
-                    current_row += 1
+                    if self.field[current_row][column] != 0:
+                        current_row += 1
                     self.field[current_row][column] = self.field[row][column]
                     self.field[row][column] = 0 if row != current_row else self.field[row][column]
                     # current_row += 1
