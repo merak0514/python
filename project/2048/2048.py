@@ -23,6 +23,17 @@ action_dict = dict(zip(available_input, action * 2))
 '''
 
 
+def input_char(gameboard):
+    """
+    键盘上按一个按键
+    :return: string
+    """
+    char = "N"
+    while char not in action_dict:
+        char = gameboard.getch()
+    return action_dict[char]
+
+
 class Game:
     def __init__(self):
         self.rand2 = 0.8  # 随机出现2的概率
@@ -31,13 +42,25 @@ class Game:
         self.score = 0
         self.high_score = 0
         # self.field = [[2, 2, 0, 0], [2, 2, 2, 0], [2, 2, 2, 2], [2, 0, 0, 2]]  # 单元测试
-        self.field = [[2, 2, 0, 2], [2, 2, 2, 2], [2, 2, 2, 8], [2, 0, 0, 8]]  # 单元测试
-        # self.field = [[0 for i in range(self.width)] for j in range(self.height)]
+        # self.field = [[2, 2, 0, 2], [2, 2, 2, 2], [2, 2, 2, 8], [2, 0, 0, 8]]  # 单元测试
+        self.field = [[0 for i in range(self.width)] for j in range(self.height)]
         self.message = ''
         # self.reset()
 
-    def reset(self):
+    def draw(self, gameboard):
+        def cast(self, string):
+            """
+            gameboard上的输出函数
+            :param string: 需要输出的
+            """
+            gameboard.addstr(string, '\n')
+        # def draw_horiz
 
+
+    def reset(self):
+        """
+        重新开始游戏，放置两个数字到棋盘上
+        """
         if self.score > self.high_score:
             self.high_score = self.score
             self.message = 'New High Score'
@@ -56,7 +79,7 @@ class Game:
                              for j in range(self.width) if self.field[i][j] == 0])
         self.field[drop_point[1]][drop_point[1]] = new_element
 
-    def print_field(self):
+    def print_field(self):  # 输出矩阵
         for row in range(self.height):
             print(self.field[row])
         print('\n')
@@ -106,23 +129,31 @@ class Game:
             self.reverse()
         elif direction == "left":
             self.reverse()
-                # else:
-                #     for position in range(row - 1, 0, 1):
-                #         if self.field[position][column] == 0:
-                #             continue
-                #         if self.field[position][column] == self.field[row][column]:
-                #             self.field[position][column] *= 2
-                #             self.field[row][column] = 0
-                #         else:
-                #             temp = self.field[row][column]
-                #             self.field[row][column] = 0
-                #             self.field[position+1][column] = temp
+            # else:
+            #     for position in range(row - 1, 0, 1):
+            #         if self.field[position][column] == 0:
+            #             continue
+            #         if self.field[position][column] == self.field[row][column]:
+            #             self.field[position][column] *= 2
+            #             self.field[row][column] = 0
+            #         else:
+            #             temp = self.field[row][column]
+            #             self.field[row][column] = 0
+            #             self.field[position+1][column] = temp
         # for column in range(self.width):
         #     for row in range(1, self.height):
 
 
-def main():
+def main(gameboard):
     game = Game()
+
+    def init():
+        game.reset()
+        return "game"
+
+    # def game():
+    #
+
     game.print_field()
     # a = 1
     # while a != 0:
@@ -132,3 +163,6 @@ def main():
     # game.reverse()
     # game.print_field()
     # game.place()
+
+
+curses.wrapper(main)
