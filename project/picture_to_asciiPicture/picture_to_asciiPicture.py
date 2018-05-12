@@ -1,16 +1,14 @@
 # 灰度公式：gray ＝ 0.2126 * r + 0.7152 * g + 0.0722 * b
+# 思想：把rgb转化为灰度，把256位的灰度值映射到字符表上
 
 from PIL import Image
 import argparse
 import re
 
-
 picture_name = ''
-
-paser = argparse.ArgumentParser(prog="pic2ascii")
+#
+# paser = argparse.ArgumentParser(prog="pic2ascii")
 # paser.add_argument('file')
-#
-#
 # args = paser.parse_args()
 # print(args.file)
 
