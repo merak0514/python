@@ -64,7 +64,6 @@ class Game:
     def reverse(self):
         """
         矩阵向左转置
-        :return:
         """
         new = [[0 for i in range(self.width)] for j in range(self.height)]
         for row in range(self.height):
@@ -72,12 +71,19 @@ class Game:
                 new[column][row] = self.field[row][column]
         self.field = new
 
-    def move(self):
+    def move(self, direction):
         """
         操作矩阵
-        :return:
         """
-
+        if direction == "right":
+            self.reverse()
+        elif direction == "down:":
+            self.reverse()
+            self.reverse()
+        elif direction == "left":
+            self.reverse()
+            self.reverse()
+            self.reverse()
         for column in range(self.width):  # 移动元素
             current_row = 0  # 记录目前转换后的数字的位置
             for row in range(self.height):
@@ -91,7 +97,15 @@ class Game:
                         current_row += 1
                     self.field[current_row][column] = self.field[row][column]
                     self.field[row][column] = 0 if row != current_row else self.field[row][column]
-
+        if direction == "right":
+            self.reverse()
+            self.reverse()
+            self.reverse()
+        elif direction == "down:":
+            self.reverse()
+            self.reverse()
+        elif direction == "left":
+            self.reverse()
                 # else:
                 #     for position in range(row - 1, 0, 1):
                 #         if self.field[position][column] == 0:
@@ -107,14 +121,14 @@ class Game:
         #     for row in range(1, self.height):
 
 
-if __name__ == '__main__':
+def main():
     game = Game()
     game.print_field()
     # a = 1
     # while a != 0:
-    game.move()
+    game.move("left")
     # a = int(input('输入a'))
     game.print_field()
-    game.reverse()
-    game.print_field()
+    # game.reverse()
+    # game.print_field()
     # game.place()
