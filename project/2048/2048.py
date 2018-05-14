@@ -48,15 +48,24 @@ class Game:
         # self.reset()
 
     def draw(self, gameboard):
-        def cast(self, string):
+
+        def cast(string):
             """
             gameboard上的输出函数
             :param string: 需要输出的
             """
             gameboard.addstr(string, '\n')
-        # def draw_horiz
 
+        def draw_row():
+            cast('+'+"----+" * self.width)
 
+        gameboard.clear()
+        for i in range(self.height):
+            for j in range(self.width):
+                gameboard.addstr(self.field[i][j], '\t')
+            gameboard.addstr('\n')
+        if self.game_over():
+            cast("Game Over!")
     def reset(self):
         """
         重新开始游戏，放置两个数字到棋盘上
@@ -98,6 +107,7 @@ class Game:
         """
         操作矩阵
         """
+        temp = self.field
         if direction == "right":
             self.reverse()
         elif direction == "down:":
@@ -129,40 +139,72 @@ class Game:
             self.reverse()
         elif direction == "left":
             self.reverse()
-            # else:
-            #     for position in range(row - 1, 0, 1):
-            #         if self.field[position][column] == 0:
-            #             continue
-            #         if self.field[position][column] == self.field[row][column]:
-            #             self.field[position][column] *= 2
-            #             self.field[row][column] = 0
-            #         else:
-            #             temp = self.field[row][column]
-            #             self.field[row][column] = 0
-            #             self.field[position+1][column] = temp
-        # for column in range(self.width):
-        #     for row in range(1, self.height):
+        if temp == self.field:
+            return 0
+        else:
+            return 1
+
+    def game_over(self):
+        """
+        判断是否失败
+        :return: bool 失败返回1；成功返回0；
+        """
+        for i in range(2, self.height-1):
+            for j in range(2, self.width-1):
+                if self.field[i][j] == (self.field[i][j - 1] or self.field[i][j + 1]
+                                        or self.field[i - 1][j] or self.field[i + 1][j] or 0):
+                    return 1
+                return 0
 
 
 def main(gameboard):
-    game = Game()
 
     def init():
         game.reset()
-        return "game"
+        return "gaming"
 
-    # def game():
-    #
+    def gaming():
+        """
+        一次操作：获得输入的操作，根据操作执行一次，生成一个新的方块
+        :return: string 游戏状态
+        """
+        game.draw(gameboard)
+        flag = 0
+        while flag != 1:
+            direction = input_char(gameboard)
+            if direction == "restart":
+                return "restart"
+            elif direction == "quit":
+                return "quit"
+            flag = game.move(direction)
+        game.place()
+        if game.game_over():
+            return "game_over"
+        game.draw(gameboard)
+        return "gaming"
 
-    game.print_field()
-    # a = 1
-    # while a != 0:
-    game.move("left")
-    # a = int(input('输入a'))
-    game.print_field()
-    # game.reverse()
+    def game_over():
+        game.draw(gameboard)
+
+    status_action = {
+        "restart": init,
+        "gaming": gaming,
+        "game_over": game_over
+    }
+
+    game = Game()
+    status = "init"
+    while status != "quit":
+        status = status_action[status]()
     # game.print_field()
-    # game.place()
+    # # a = 1
+    # # while a != 0:
+    # game.move("left")
+    # # a = int(input('输入a'))
+    # game.print_field()
+    # # game.reverse()
+    # # game.print_field()
+    # # game.place()
 
 
 curses.wrapper(main)
