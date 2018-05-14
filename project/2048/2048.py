@@ -18,10 +18,7 @@ action = ["up", "right", "down", "left", "restart", "exit"]
 available_input = [ord(char) for char in "wdsarqWDSARQ"]
 action_dict = dict(zip(available_input, action * 2))
 
-'''
-状态判定
-'''
-
+fhand = open('operation.log', 'wb')
 
 def input_char(gameboard):
     """
@@ -33,6 +30,9 @@ def input_char(gameboard):
         char = gameboard.getch()
     return action_dict[char]
 
+
+# d = input_char('s')
+# print(d)
 
 class Game:
     def __init__(self):
@@ -54,7 +54,7 @@ class Game:
             gameboard上的输出函数
             :param string: 需要输出的
             """
-            gameboard.addstr(string, '\n')
+            gameboard.addstr(string + '\n')
 
         def draw_row():
             cast('+'+"----+" * self.width)
@@ -62,17 +62,20 @@ class Game:
         gameboard.clear()
         for i in range(self.height):
             for j in range(self.width):
-                gameboard.addstr(self.field[i][j], '\t')
+                gameboard.addstr('{}'.format(self.field[i][j]) + '\t')
             gameboard.addstr('\n')
         if self.game_over():
             cast("Game Over!")
+
     def reset(self):
         """
         重新开始游戏，放置两个数字到棋盘上
         """
+
         if self.score > self.high_score:
             self.high_score = self.score
             self.message = 'New High Score'
+        self.field = [[0 for i in range(self.width)] for j in range(self.height)]
         self.score = 0
         # self.draw_game_board()
         self.place()
@@ -86,7 +89,7 @@ class Game:
         new_element = 2 if random() < self.rand2 else 4
         drop_point = choice([(i, j) for i in range(self.height)
                              for j in range(self.width) if self.field[i][j] == 0])
-        self.field[drop_point[1]][drop_point[1]] = new_element
+        self.field[drop_point[0]][drop_point[1]] = new_element
 
     def print_field(self):  # 输出矩阵
         for row in range(self.height):
@@ -149,18 +152,19 @@ class Game:
         判断是否失败
         :return: bool 失败返回1；成功返回0；
         """
-        for i in range(2, self.height-1):
-            for j in range(2, self.width-1):
+        for i in range(self.height):
+            for j in range(self.width):
                 if self.field[i][j] == (self.field[i][j - 1] or self.field[i][j + 1]
                                         or self.field[i - 1][j] or self.field[i + 1][j] or 0):
-                    return 1
-                return 0
+                    return 0
+                return 1
 
 
 def main(gameboard):
 
     def init():
         game.reset()
+
         return "gaming"
 
     def gaming():
@@ -173,6 +177,7 @@ def main(gameboard):
         while flag != 1:
             direction = input_char(gameboard)
             if direction == "restart":
+
                 return "restart"
             elif direction == "quit":
                 return "quit"
@@ -193,9 +198,10 @@ def main(gameboard):
     }
 
     game = Game()
-    status = "init"
+    status = "restart"
     while status != "quit":
         status = status_action[status]()
+    init()
     # game.print_field()
     # # a = 1
     # # while a != 0:
