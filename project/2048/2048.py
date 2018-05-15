@@ -22,11 +22,12 @@ action_dict = dict(zip(available_input, action * 2))
 
 temp = 1
 while True:
-    if not os.path.isfile('operation_%i.log' % temp):
+    if not os.path.isfile('log/operation_%i.log' % temp):
         break
     temp += 1
-fhand = open('operation_%i.log' % temp, 'a')  # 打开日志文件
+fhand = open('log/operation_%i.log' % temp, 'a')  # 打开日志文件
 print(action_dict)
+
 
 def write_in(string):
     s = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -55,11 +56,13 @@ class Game:
         self.width = 4
         self.score = 0
         self.high_score = 0
-        # self.field = [[2, 2, 0, 0], [2, 2, 2, 0], [2, 2, 2, 2], [2, 0, 0, 2]]  # 单元测试
-        # self.field = [[2, 2, 0, 2], [2, 2, 2, 2], [2, 2, 2, 8], [2, 0, 0, 8]]  # 单元测试
-        self.field = [[0 for i in range(self.width)] for j in range(self.height)]
+        # self.field = [[2, 2, 0, 0], [2, 2, 2, 0], [2, 2, 2, 2], [2, 0, 0, 2]]  # 测试move
+        # self.field = [[2, 2, 0, 2], [2, 2, 2, 2], [2, 2, 2, 8], [2, 0, 0, 8]]  # 测试move
+        self.field = [[2, 4, 2, 8], [4, 2, 2, 2], [2, 2, 2, 8], [2, 2, 2, 8]]  # 测试game_over
+        # self.field = [[2, 4, 5, 2], [1, 3, 2, 9], [10, 12, 22, 48], [92, 186, 74, 58]]  # 测试game_over
+        # self.field = [[0 for i in range(self.width)] for j in range(self.height)]
         self.message = ''
-        # self.reset()
+        self.reset()
 
     def draw(self, gameboard):
 
@@ -106,7 +109,7 @@ class Game:
         drop_point = choice([(i, j) for i in range(self.height)
                              for j in range(self.width) if self.field[i][j] == 0])
         self.field[drop_point[0]][drop_point[1]] = new_element
-        string = "Place" + str(new_element) + "at" + str(drop_point)
+        string = "Place " + str(new_element) + " at " + str(drop_point)
         write_in(string)
 
     def print_field(self):  # 输出矩阵
@@ -129,40 +132,45 @@ class Game:
         操作矩阵
         """
         temp = self.field
-        if direction == "right":
+        if direction == "left":
             self.reverse()
         elif direction == "down:":
             self.reverse()
             self.reverse()
-        elif direction == "left":
+        elif direction == "right":
             self.reverse()
             self.reverse()
             self.reverse()
         for column in range(self.width):  # 移动元素
+            flag = 0  # flag还未启用。在第一次合并后会启用，避免出现连续合并的现象
             current_row = 0  # 记录目前转换后的数字的位置
             for row in range(self.height):
                 if self.field[row][column] == 0 or row == current_row:  # 无元素
                     continue
                 elif self.field[row][column] == self.field[current_row][column]:  # 相同元素
-                    self.field[current_row][column] *= 2
-                    self.field[row][column] = 0
+                    if flag == 0:
+                        self.field[current_row][column] *= 2
+                        self.field[row][column] = 0
+                        flag = 1  # flag已使用
+                    else:
+                        flag = 0  # flag重置为未使用
                 else:  # 不同元素
                     if self.field[current_row][column] != 0:
                         current_row += 1
                     self.field[current_row][column] = self.field[row][column]
                     self.field[row][column] = 0 if row != current_row else self.field[row][column]
-        if direction == "right":
+        if direction == "left":
             self.reverse()
             self.reverse()
             self.reverse()
-            write_in("Move right")
+            write_in("Move left")
         elif direction == "down:":
             self.reverse()
             self.reverse()
             write_in("Move down")
-        elif direction == "left":
+        elif direction == "right":
             self.reverse()
-            write_in("Move left")
+            write_in("Move right")
         else:
             write_in("Move up")
         if temp == self.field:
@@ -177,75 +185,98 @@ class Game:
         判断是否失败
         :return: bool 失败返回1；成功返回0；
         """
-        for i in range(self.height):
-            for j in range(self.width):
+        for row in self.field:
+            if 0 in row:
+                write_in("There is zero in row ")
+                return 0
+        write_in("There aren't any 0")
+        for i in range(0, self.height):
+            for j in range(1, self.width):
                 write_in("Testing %i, %i" % (i, j))
-                if self.field[i][j] == self.field[i][j-1] or self.field[i][j] == self.field[i-1][j] or self.field[i][j] == 0:
+                if self.field[i][j] == self.field[i][j-1]:
                     write_in("Game not over %i, %i" % (i, j))
                     return 0
-                else:
-                    write_in("Game Over\n")
-                    return 1
+        for i in range(0, self.width):
+            for j in range(1, self.height):
+                write_in("Testing %i, %i" % (i, j))
+                if self.field[i][j] == self.field[i-1][j]:
+                    write_in("Game not over %i, %i" % (i, j))
+                    return 0
+        write_in("Game Over\n")
+        return 1
 
 
-def main(gameboard):
+game = Game()
+# print(game.game_over())
+# game.print_field()
 
-    def init():
-        game.reset()
+# def main(gameboard):
+#
+#     def init():
+#         game.reset()
+#
+#         return "gaming"
+#
+#     def gaming():
+#         """
+#         一次操作：获得输入的操作，根据操作执行一次，生成一个新的方块
+#         :return: string 游戏状态
+#         """
+#         game.draw(gameboard)
+#         flag = 0
+#         while flag != 1:
+#             direction = input_char(gameboard)
+#             if direction == "restart":
+#                 return "restart"
+#             elif direction == "quit":
+#                 write_in("Quit")
+#                 return "quit"
+#             flag = game.move(direction)
+#         game.place()
+#         if game.game_over():
+#             return "game_over"
+#         game.draw(gameboard)
+#         return "gaming"
+#
+#     def game_over():
+#         game.draw(gameboard)
+#         while True:
+#             a = input_char(gameboard)
+#             if a == "quit" or a == "restart":
+#                 break
+#         return a
+#
+#     status_action = {
+#         "restart": init,
+#         "gaming": gaming,
+#         "game_over": game_over,
+#
+#     }
+#
+#     game = Game()
+#     status = "restart"
+#     while status != "quit":
+#         print(status)
+#         status = status_action[status]()
+#     init()
+game.print_field()
+# a = 1
+# while a != 0:
+while True:
+    a = input("direction")
+    if a == 'q':
+        write_in('quit')
+        break
+    else:
+        game.move(action_dict[ord(a)])
+        game.print_field()
 
-        return "gaming"
 
-    def gaming():
-        """
-        一次操作：获得输入的操作，根据操作执行一次，生成一个新的方块
-        :return: string 游戏状态
-        """
-        game.draw(gameboard)
-        flag = 0
-        while flag != 1:
-            direction = input_char(gameboard)
-            if direction == "restart":
-                return "restart"
-            elif direction == "quit":
-                write_in("Quit")
-                return "quit"
-            flag = game.move(direction)
-        game.place()
-        if game.game_over():
-            return "game_over"
-        game.draw(gameboard)
-        return "gaming"
-
-    def game_over():
-        game.draw(gameboard)
-        while True:
-            a = input_char(gameboard)
-            if a == "quit" or a == "restart":
-                break
-        return a
-
-    status_action = {
-        "restart": init,
-        "gaming": gaming,
-        "game_over": game_over,
-
-    }
-
-    game = Game()
-    status = "restart"
-    while status != "quit":
-        print(status)
-        status = status_action[status]()
-    init()
-    # game.print_field()
-    # # a = 1
-    # # while a != 0:
-    # game.move("left")
-    # # a = int(input('输入a'))
-    # game.print_field()
-    # # game.reverse()
-    # # game.print_field()
-    # # game.place()
+# a = int(input('输入a'))
+game.print_field()
+# game.reverse()
+# game.print_field()
+# game.place()
 
 
-curses.wrapper(main)
+# curses.wrapper(main)
