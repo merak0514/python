@@ -12,8 +12,10 @@ picture_name = ''
 # args = paser.parse_args()
 # print(args.file)
 
-ascii_char1 = list("$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,\"^`'. ")
-ascii_char2 = list("$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxr                            . ")
+ascii_char1 = list(
+    "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,\"^`'. ")
+ascii_char2 = list(
+    "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxr                            . ")
 
 
 def get_picture():
@@ -39,8 +41,8 @@ def get_char(r, g, b, alpha=256):
     if alpha == 0:
         return ' '
     gray = int(0.2126 * r + 0.7152 * g + 0.0722 * b)
-    step = 257/len(ascii_char1)
-    chosen_char = ascii_char1[int(gray / step)]
+    step = 257 / len(ascii_char2)
+    chosen_char = ascii_char2[int(gray / step)]
     return chosen_char
 # print(get_char(256,256,256))
 

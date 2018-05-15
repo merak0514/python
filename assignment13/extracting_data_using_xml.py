@@ -23,3 +23,7 @@ import xml.etree.ElementTree as ET
 service_url = 'http://py4e-data.dr-chuck.met/'
 
 address = input
+try:
+	fhand = request.urlopen('http://'+)
+except Exception as e:
+	raise e
