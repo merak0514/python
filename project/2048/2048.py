@@ -16,7 +16,7 @@ import os
 '''
 用户操作列表
 '''
-action = ["up", "right", "down", "left", "restart", "exit"]
+action = ["up", "right", "down", "left", "restart", "quit"]
 available_input = [ord(char) for char in "wdsarqWDSARQ"]
 action_dict = dict(zip(available_input, action * 2))
 
@@ -26,7 +26,7 @@ while True:
         break
     temp += 1
 fhand = open('operation_%i.log' % temp, 'a')  # 打开日志文件
-
+print(action_dict)
 
 def write_in(string):
     s = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -166,8 +166,10 @@ class Game:
         else:
             write_in("Move up")
         if temp == self.field:
+            write_in("Not Success")
             return 0
         else:
+            write_in("Success")
             return 1
 
     def game_over(self):
@@ -177,8 +179,9 @@ class Game:
         """
         for i in range(self.height):
             for j in range(self.width):
-                if self.field[i][j] == (self.field[i][j - 1] or self.field[i][j + 1]
-                                        or self.field[i - 1][j] or self.field[i + 1][j] or 0):
+                write_in("Testing %i, %i" % (i, j))
+                if self.field[i][j] == self.field[i][j-1] or self.field[i][j] == self.field[i-1][j] or self.field[i][j] == 0:
+                    write_in("Game not over %i, %i" % (i, j))
                     return 0
                 else:
                     write_in("Game Over\n")
@@ -202,9 +205,9 @@ def main(gameboard):
         while flag != 1:
             direction = input_char(gameboard)
             if direction == "restart":
-
                 return "restart"
             elif direction == "quit":
+                write_in("Quit")
                 return "quit"
             flag = game.move(direction)
         game.place()
@@ -215,16 +218,23 @@ def main(gameboard):
 
     def game_over():
         game.draw(gameboard)
+        while True:
+            a = input_char(gameboard)
+            if a == "quit" or a == "restart":
+                break
+        return a
 
     status_action = {
         "restart": init,
         "gaming": gaming,
-        "game_over": game_over
+        "game_over": game_over,
+
     }
 
     game = Game()
     status = "restart"
     while status != "quit":
+        print(status)
         status = status_action[status]()
     init()
     # game.print_field()
