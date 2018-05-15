@@ -8,6 +8,8 @@
 # list(zip([1,2,3],[4,5]))->[(1,4),(2,5)]
 import curses
 from random import random, choice
+import datetime
+import os
 
 # stdscr = curses.initscr()
 
@@ -18,7 +20,19 @@ action = ["up", "right", "down", "left", "restart", "exit"]
 available_input = [ord(char) for char in "wdsarqWDSARQ"]
 action_dict = dict(zip(available_input, action * 2))
 
-fhand = open('operation.log', 'wb')
+temp = 1
+while True:
+    if not os.path.isfile('operation_%i.log' % temp):
+        break
+    temp += 1
+fhand = open('operation_%i.log' % temp, 'a')  # 打开日志文件
+
+
+def write_in(string):
+    s = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    s += string + '\n'
+    fhand.write(s)
+
 
 def input_char(gameboard):
     """
@@ -75,6 +89,8 @@ class Game:
         if self.score > self.high_score:
             self.high_score = self.score
             self.message = 'New High Score'
+            write_in("New High Score")
+        write_in("Game reset")
         self.field = [[0 for i in range(self.width)] for j in range(self.height)]
         self.score = 0
         # self.draw_game_board()
@@ -90,6 +106,8 @@ class Game:
         drop_point = choice([(i, j) for i in range(self.height)
                              for j in range(self.width) if self.field[i][j] == 0])
         self.field[drop_point[0]][drop_point[1]] = new_element
+        string = "Place" + str(new_element) + "at" + str(drop_point)
+        write_in(string)
 
     def print_field(self):  # 输出矩阵
         for row in range(self.height):
@@ -137,11 +155,16 @@ class Game:
             self.reverse()
             self.reverse()
             self.reverse()
+            write_in("Move right")
         elif direction == "down:":
             self.reverse()
             self.reverse()
+            write_in("Move down")
         elif direction == "left":
             self.reverse()
+            write_in("Move left")
+        else:
+            write_in("Move up")
         if temp == self.field:
             return 0
         else:
@@ -157,7 +180,9 @@ class Game:
                 if self.field[i][j] == (self.field[i][j - 1] or self.field[i][j + 1]
                                         or self.field[i - 1][j] or self.field[i + 1][j] or 0):
                     return 0
-                return 1
+                else:
+                    write_in("Game Over\n")
+                    return 1
 
 
 def main(gameboard):
