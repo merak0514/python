@@ -58,11 +58,12 @@ class Game:
         self.high_score = 0
         # self.field = [[2, 2, 0, 0], [2, 2, 2, 0], [2, 2, 2, 2], [2, 0, 0, 2]]  # 测试move
         # self.field = [[2, 2, 0, 2], [2, 2, 2, 2], [2, 2, 2, 8], [2, 0, 0, 8]]  # 测试move
-        self.field = [[2, 4, 2, 8], [4, 2, 2, 2], [2, 2, 2, 8], [2, 2, 2, 8]]  # 测试game_over
+        # self.field = [[0, 0, 0, 0], [4, 2, 2, 2], [2, 2, 4, 8], [2, 2, 2, 8]]  # 测试game_over
+        self.field = [[0, 2, 2, 0], [0, 0, 0, 0], [0, 0, 0, 4], [0, 0, 4, 0]]  # 测试game_over
         # self.field = [[2, 4, 5, 2], [1, 3, 2, 9], [10, 12, 22, 48], [92, 186, 74, 58]]  # 测试game_over
-        # self.field = [[0 for i in range(self.width)] for j in range(self.height)]
+        self.field = [[0 for i in range(self.width)] for j in range(self.height)]
         self.message = ''
-        self.reset()
+        # self.reset()
 
     def draw(self, gameboard):
 
@@ -124,17 +125,22 @@ class Game:
         new = [[0 for i in range(self.width)] for j in range(self.height)]
         for row in range(self.height):
             for column in range(self.width):
-                new[column][row] = self.field[row][column]
+                new[column][self.width-row-1] = self.field[row][column]
         self.field = new
 
     def move(self, direction):
         """
         操作矩阵
         """
-        temp = self.field
+        temp_matrix = [[0 for i in range(self.width)] for j in range(self.height)]
+        for i in range(self.height):
+            for j in range(self.width):
+                temp_matrix[i][j] = self.field[i][j]
+        print(temp_matrix == self.field)
+        print(temp_matrix)
         if direction == "left":
             self.reverse()
-        elif direction == "down:":
+        elif direction == "down":
             self.reverse()
             self.reverse()
         elif direction == "right":
@@ -144,27 +150,30 @@ class Game:
         for column in range(self.width):  # 移动元素
             flag = 0  # flag还未启用。在第一次合并后会启用，避免出现连续合并的现象
             current_row = 0  # 记录目前转换后的数字的位置
-            for row in range(self.height):
+            for row in range(1, self.height):
                 if self.field[row][column] == 0 or row == current_row:  # 无元素
                     continue
                 elif self.field[row][column] == self.field[current_row][column]:  # 相同元素
-                    if flag == 0:
-                        self.field[current_row][column] *= 2
-                        self.field[row][column] = 0
-                        flag = 1  # flag已使用
-                    else:
-                        flag = 0  # flag重置为未使用
+                    # if flag == 0:
+                    self.field[current_row][column] *= 2
+                    self.field[row][column] = 0
+                    current_row += 1
+                    flag = 1  # flag已使用
+                # else:
+                    flag = 0  # flag重置为未使用
                 else:  # 不同元素
                     if self.field[current_row][column] != 0:
                         current_row += 1
+                    # current_row += 1
                     self.field[current_row][column] = self.field[row][column]
                     self.field[row][column] = 0 if row != current_row else self.field[row][column]
+
         if direction == "left":
             self.reverse()
             self.reverse()
             self.reverse()
             write_in("Move left")
-        elif direction == "down:":
+        elif direction == "down":
             self.reverse()
             self.reverse()
             write_in("Move down")
@@ -173,7 +182,9 @@ class Game:
             write_in("Move right")
         else:
             write_in("Move up")
-        if temp == self.field:
+        self.print_field()
+        print(temp_matrix)
+        if temp_matrix == self.field:
             write_in("Not Success")
             return 0
         else:
@@ -206,77 +217,94 @@ class Game:
         return 1
 
 
-game = Game()
+# game = Game()
 # print(game.game_over())
 # game.print_field()
 
-# def main(gameboard):
-#
-#     def init():
-#         game.reset()
-#
-#         return "gaming"
-#
-#     def gaming():
-#         """
-#         一次操作：获得输入的操作，根据操作执行一次，生成一个新的方块
-#         :return: string 游戏状态
-#         """
-#         game.draw(gameboard)
-#         flag = 0
-#         while flag != 1:
-#             direction = input_char(gameboard)
-#             if direction == "restart":
-#                 return "restart"
-#             elif direction == "quit":
-#                 write_in("Quit")
-#                 return "quit"
-#             flag = game.move(direction)
-#         game.place()
-#         if game.game_over():
-#             return "game_over"
-#         game.draw(gameboard)
-#         return "gaming"
-#
-#     def game_over():
-#         game.draw(gameboard)
-#         while True:
-#             a = input_char(gameboard)
-#             if a == "quit" or a == "restart":
-#                 break
-#         return a
-#
-#     status_action = {
-#         "restart": init,
-#         "gaming": gaming,
-#         "game_over": game_over,
-#
-#     }
-#
-#     game = Game()
-#     status = "restart"
-#     while status != "quit":
-#         print(status)
-#         status = status_action[status]()
-#     init()
-game.print_field()
-# a = 1
-# while a != 0:
-while True:
-    a = input("direction")
-    if a == 'q':
-        write_in('quit')
-        break
-    else:
-        game.move(action_dict[ord(a)])
-        game.print_field()
+
+# Real game
+def main(gameboard):
+
+    def init():
+        game.reset()
+
+        return "gaming"
+
+    def gaming():
+        """
+        一次操作：获得输入的操作，根据操作执行一次，生成一个新的方块
+        :return: string 游戏状态
+        """
+        game.draw(gameboard)
+        flag = 0
+        while flag != 1:
+            direction = input_char(gameboard)
+            write_in("Input: "+direction)
+            print("direction: "+direction)
+            if direction == "restart":
+                return "restart"
+            elif direction == "quit":
+                write_in("Quit")
+                return "quit"
+            flag = game.move(direction)
+        game.place()
+        if game.game_over():
+            return "game_over"
+        game.draw(gameboard)
+        return "gaming"
+
+    def game_over():
+        game.draw(gameboard)
+        while True:
+            a = input_char(gameboard)
+            if a == "quit" or a == "restart":
+                break
+        return a
+
+    status_action = {
+        "restart": init,
+        "gaming": gaming,
+        "game_over": game_over,
+
+    }
+
+    game = Game()
+    status = "restart"
+    while status != "quit":
+        print(status)
+        status = status_action[status]()
+    init()
 
 
-# a = int(input('输入a'))
-game.print_field()
+curses.wrapper(main)
+
+
+# game.print_field()
+
+# REVERSE
+# game.reverse()
+# game.print_field()
+# game.reverse()
+# game.print_field()
+# game.reverse()
+# game.print_field()
+
+# # GAME
+# game = Game()
+# game.print_field()
+# while True:
+#     a = input("direction")
+#     if a == 'q':
+#         write_in('quit')
+#         break
+#     else:
+#         print(action_dict[ord(a)])
+#         game.move(action_dict[ord(a)])
+#         game.print_field()
+#
+#
+# game.print_field()
+
 # game.reverse()
 # game.print_field()
 # game.place()
-
-
-# curses.wrapper(main)
