@@ -6,6 +6,7 @@
 # ord函数：输入字符，返回一个ASCII或Unicode数值
 # zip函数：接收多个序列，打包后返回一个序列（需要用list（））打出
 # list(zip([1,2,3],[4,5]))->[(1,4),(2,5)]
+# 原来的bug：在curses.wrapper()中的a=list(), b=list(), a=b会使两者占用内存位置相同。
 import curses
 from random import random, choice
 import datetime
