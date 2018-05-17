@@ -188,20 +188,15 @@ class Game:
         """
         for row in self.field:
             if 0 in row:
-                write_in("There is zero in row ")
                 return 0
         write_in("There aren't any 0")
         for i in range(0, self.height):
             for j in range(1, self.width):
-                write_in("Testing %i, %i" % (i, j))
                 if self.field[i][j] == self.field[i][j-1]:
-                    write_in("Game not over %i, %i" % (i, j))
                     return 0
         for i in range(0, self.width):
             for j in range(1, self.height):
-                write_in("Testing %i, %i" % (j, i))
                 if self.field[j][i] == self.field[j-1][i]:
-                    write_in("Game not over %i, %i" % (j, i))
                     return 0
         write_in("Game Over\n")
         self.message = "Game Over"
