@@ -51,15 +51,15 @@ def input_char(gameboard):
 class Game:
     def __init__(self):
         self.rand2 = 0.8  # 随机出现2的概率
-        self.height = 4
-        self.width = 4
+        self.height = 3
+        self.width = 3
         self.score = 0
         self.high_score = 0
         self.field = [[0 for i in range(self.width)] for j in range(self.height)]
         self.message = ''  # 其实没用用
         self.reset()  # 初始化
 
-    def draw(self, gameboard):
+    def draw(self, gameboard, is_game_over=False):
 
         def cast(string):
             """ gameboard上的输出函数"""
@@ -80,7 +80,7 @@ class Game:
             gameboard.addstr('|\n')
         draw_row()
 
-        if self.game_over():
+        if is_game_over:
             cast("Game Over!")
             cast("(r)Restart; (q)Quit")
         else:
@@ -188,14 +188,20 @@ class Game:
         """
         for row in self.field:
             if 0 in row:
+                write_in("There is zero in row ")
                 return 0
+        write_in("There aren't any 0")
         for i in range(0, self.height):
             for j in range(1, self.width):
+                write_in("Testing %i, %i" % (i, j))
                 if self.field[i][j] == self.field[i][j-1]:
+                    write_in("Game not over %i, %i" % (i, j))
                     return 0
         for i in range(0, self.width):
             for j in range(1, self.height):
-                if self.field[i][j] == self.field[i-1][j]:
+                write_in("Testing %i, %i" % (j, i))
+                if self.field[j][i] == self.field[j-1][i]:
+                    write_in("Game not over %i, %i" % (j, i))
                     return 0
         write_in("Game Over\n")
         self.message = "Game Over"
@@ -232,7 +238,7 @@ def main(gameboard):
         return "gaming"
 
     def game_over():
-        game.draw(gameboard)
+        game.draw(gameboard, True)
         while True:
             a = input_char(gameboard)
             if a == "quit" or a == "restart":
