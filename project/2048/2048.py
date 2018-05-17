@@ -1,4 +1,4 @@
-# !/merak/desktop/python/
+# !/merak/desktop/python
 # @Time     : 19:47
 # @Author   : Merak
 # @File     : 2048.py
@@ -11,7 +11,7 @@ import curses
 from random import random, choice
 import datetime
 import os
-
+from DrawTitle import DrawT
 # stdscr = curses.initscr()
 
 '''
@@ -64,7 +64,7 @@ class Game:
         # self.field = [[2, 4, 5, 2], [1, 3, 2, 9], [10, 12, 22, 48], [92, 186, 74, 58]]  # 测试game_over
         self.field = [[0 for i in range(self.width)] for j in range(self.height)]
         self.message = ''
-        # self.reset()
+        self.reset()
 
     def draw(self, gameboard):
 
@@ -76,13 +76,18 @@ class Game:
             gameboard.addstr(string + '\n')
 
         def draw_row():
-            cast('+'+"----+" * self.width)
+            cast('+'+"-----+" * self.width)
 
         gameboard.clear()
+        d = DrawT(self.width*6, self.message, gameboard, self.score, self.high_score)
+        d.draw_title()
+        d.draw_score()
         for i in range(self.height):
+            draw_row()
             for j in range(self.width):
-                gameboard.addstr('{}'.format(self.field[i][j]) + '\t')
-            gameboard.addstr('\n')
+                gameboard.addstr('|{:^5}'.format(self.field[i][j])if self.field[i][j] > 0 else '|     ')
+            gameboard.addstr('|\n')
+        draw_row()
         if self.game_over():
             cast("Game Over!")
 
@@ -137,8 +142,6 @@ class Game:
         for i in range(self.height):
             for j in range(self.width):
                 temp_matrix[i][j] = self.field[i][j]
-        print(temp_matrix == self.field)
-        print(temp_matrix)
         if direction == "left":
             self.reverse()
         elif direction == "down":
@@ -156,9 +159,11 @@ class Game:
                     continue
                 elif self.field[row][column] == self.field[current_row][column]:  # 相同元素
                     # if flag == 0:
+                    self.score += self.field[current_row][column]
                     self.field[current_row][column] *= 2
                     self.field[row][column] = 0
                     current_row += 1
+
                     flag = 1  # flag已使用
                 # else:
                     flag = 0  # flag重置为未使用
@@ -183,8 +188,6 @@ class Game:
             write_in("Move right")
         else:
             write_in("Move up")
-        self.print_field()
-        print(temp_matrix)
         if temp_matrix == self.field:
             write_in("Not Success")
             return 0
@@ -215,6 +218,7 @@ class Game:
                     write_in("Game not over %i, %i" % (i, j))
                     return 0
         write_in("Game Over\n")
+        self.message = "Game Over"
         return 1
 
 
