@@ -3,38 +3,41 @@
 # @Author   : Merak
 # @File     : test.py
 # @Software : PyCharm
-import curses
-from time import sleep
+# 用于测试2048的某些样例
+# self.field = [[2, 2, 0, 0], [2, 2, 2, 0], [2, 2, 2, 2], [2, 0, 0, 2]]  # 测试move
+# self.field = [[2, 2, 0, 2], [2, 2, 2, 2], [2, 2, 2, 8], [2, 0, 0, 8]]  # 测试move
+# self.field = [[0, 0, 0, 0], [4, 2, 2, 2], [2, 2, 4, 8], [2, 2, 2, 8]]  # 测试game_over
+# self.field = [[0, 2, 2, 0], [0, 0, 0, 0], [0, 0, 0, 4], [0, 0, 4, 0]]  # 测试game_over
+# self.field = [[2, 4, 5, 2], [1, 3, 2, 9], [10, 12, 22, 48], [92, 186, 74, 58]]  # 测试game_over
 
 
-class A():
-    def __init__(self, height=4, width=4, win=2048):
-        self.height = height
-        self.width = width
-        self.win_value = win
-        self.score = 0
-        self.highscore = 0
 
-    def add(self, a):
-        a.clear()
-        a.addstr('fsa')
-        input('daf')
+# game.print_field()
 
+# REVERSE
+# game.reverse()
+# game.print_field()
+# game.reverse()
+# game.print_field()
+# game.reverse()
+# game.print_field()
 
-def main(screen):
-    def init():
-        # print('init')
-        c.add(screen)
-        # print('finish init')
-        return 1
-    c = A()
-    s = 1
-    while s < 5:
-        s = init()
-        s += 1
-        sleep(1)
+# # GAME
+# game = Game()
+# game.print_field()
+# while True:
+#     a = input("direction")
+#     if a == 'q':
+#         write_in('quit')
+#         break
+#     else:
+#         print(action_dict[ord(a)])
+#         game.move(action_dict[ord(a)])
+#         game.print_field()
+#
+#
+# game.print_field()
 
-    curses.use_default_colors()
-
-
-curses.wrapper(main)
+# game.reverse()
+# game.print_field()
+# game.place()

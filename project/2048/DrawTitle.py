@@ -5,11 +5,7 @@
 # @Software : PyCharm
 
 """Draw Title"""
-print("import success")
 
-
-# def hello():
-#     print("hello")
 
 class DrawT:
     def __init__(self, length, message, gameboard, score, high_score=0):
