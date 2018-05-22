@@ -1,11 +1,11 @@
-# !/merak/desktop/python/project/wxpython/Test
+# !/merak/desktop/python/project/wxpython/draw
 # -*- coding: utf-8 -*-
 # @Time     : 16:09
 # @Author   : Merak
 # @File     : test.py
 # @Software : PyCharm
 import wx
-from Point import Point
+import figure
 
 
 class Example(wx.Frame):
@@ -24,22 +24,30 @@ class Example(wx.Frame):
     #     dc = wx.ClientDC(self)
     #     dc.DrawLine((50, 60), (100, 120))
 
-    def draw_line(self, pointa=Point, pointb=Point):
+    def draw_line(self, line):
+
         dc = wx.ClientDC(self)
-        dc.DrawLine(pointa.position(), pointb.position())
+        dc.DrawLine(line.begin(), line.end())
         return 0
 
     def resize(self):
         self.SetSize((300, 400))
 
+    def draw_circle(self, circle):
+        dc = wx.ClientDC(self)
+        dc.DrawPointList(circle)
     # def max(self):
     #     self.ShowFullScreen(True)
 
 
 if __name__ == '__main__':
-    point1 = Point(50, 60)
-    point2 = Point(50, 90)
+    point1 = (50, 60)
+    point2 = (50, 90)
+    line = figure.Line(point1, point2)
     app = wx.App()
     e = Example()
-    e.draw_line(point1, point2)
+    e.draw_line(line)
+    circle = figure.Circle((0, 0), 50)
+    points = circle.points()
+    e.draw_circle(points)
     app.MainLoop()
