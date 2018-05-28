@@ -19,7 +19,8 @@ class Calculator(wx.Frame):
 
         self.SetSize((400, 450))
         self.menu()
-
+        vbox = wx.BoxSizer(wx.VERTICAL)
+        self.head()
         self.grid_sizer()
 
     def menu(self):
@@ -90,6 +91,17 @@ class Calculator(wx.Frame):
         ])
         vbox.Add(gs, proportion=1, flag=wx.EXPAND)
         self.SetSizer(vbox)
+
+    def head(self):
+        panel = wx.Panel()
+        tc = wx.TextCtrl(panel)
+        vbox = wx.BoxSizer(wx.VERTICAL)
+        hbox = wx.BoxSizer(wx.HORIZONTAL)
+        st1 = wx.StaticText(panel, label="Input")
+        hbox.Add(st1, flag=wx.RIGHT, border=8)
+        hbox.Add(tc, proportion=1)
+        vbox.Add(hbox, flag=wx.EXPAND | wx.UP | wx.RIGHT | wx.LEFT, border=10)
+        panel.SetSizer(vbox)
 
 
 def main():
