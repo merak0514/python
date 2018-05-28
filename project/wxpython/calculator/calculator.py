@@ -17,9 +17,10 @@ class Calculator(wx.Frame):
 
     def initUI(self):
 
+        self.SetSize((400, 450))
         self.menu()
 
-        # self.grid_sizer()
+        self.grid_sizer()
 
     def menu(self):
         # menu bar
@@ -36,6 +37,7 @@ class Calculator(wx.Frame):
         file_menu.Append(wx.ID_NEW, "New")
         file_menu.Append(quitor)
         file_menu.Append(reset)
+
         # add menu to menu bar
         menu_bar.Append(file_menu, "File")
 
@@ -47,6 +49,47 @@ class Calculator(wx.Frame):
 
     def on_quit(self, e):
         self.Close()
+
+    def grid_sizer(self):
+        vbox = wx.BoxSizer(wx.VERTICAL)
+        gs = wx.GridSizer(4, 4, 5, 5)
+        one = wx.Button(self, label="1")
+        two = wx.Button(self, label="2")
+        three = wx.Button(self, label="3")
+        four = wx.Button(self, label="4")
+        five = wx.Button(self, label="5")
+        six = wx.Button(self, label="6")
+        seven = wx.Button(self, label="7")
+        eight = wx.Button(self, label="8")
+        nine = wx.Button(self, label="9")
+        zero = wx.Button(self, label="0")
+        add = wx.Button(self, label="+")
+        sub = wx.Button(self, label="-")
+        multiple = wx.Button(self, label="*")
+        divide = wx.Button(self, label="/")
+        point = wx.Button(self, label=".")
+        equal = wx.Button(self, label="=")
+
+        gs.AddMany([
+            (seven, 0, wx.EXPAND),
+            (eight, 0, wx.EXPAND),
+            (nine, 0, wx.EXPAND),
+            (add, 0, wx.EXPAND),
+            (four, 0, wx.EXPAND),
+            (five, 0, wx.EXPAND),
+            (six, 0, wx.EXPAND),
+            (sub, 0, wx.EXPAND),
+            (one, 0, wx.EXPAND),
+            (two, 0, wx.EXPAND),
+            (three, 0, wx.EXPAND),
+            (multiple, 0, wx.EXPAND),
+            (zero, 0, wx.EXPAND),
+            (point, 0, wx.EXPAND),
+            (equal, 0, wx.EXPAND),
+            (divide, 0, wx.EXPAND),
+        ])
+        vbox.Add(gs, proportion=1, flag=wx.EXPAND)
+        self.SetSizer(vbox)
 
 
 def main():
