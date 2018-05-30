@@ -13,8 +13,9 @@
 ### [数模](https://gitee.com/merak0514/python/tree/master/mathematical_modeling)
 
 ### [图片转为代码图片](https://gitee.com/merak0514/python/tree/master/project/picture_to_asciiPicture)
-+ rgb转灰度
++ rgb转灰度（公式在项目内）
 + 图片的基本处理（PIL库）
++ 问题：没有文件
 
 ### [游戏2048](https://gitee.com/merak0514/python/blob/master/project/2048/2048.py)
 + `curses`库（windows下需要装`wheel`）
