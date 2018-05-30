@@ -20,8 +20,10 @@ class Calculator(wx.Frame):
         self.SetSize((400, 450))
         self.menu()
         vbox = wx.BoxSizer(wx.VERTICAL)
-        self.head()
-        self.grid_sizer()
+        head = self.head()
+        # gs = self.grid_sizer()
+        vbox.Add(head, flag=wx.EXPAND | wx.UP | wx.RIGHT | wx.LEFT, border=10)
+        # vbox.Add(gs, proportion=1, flag=wx.EXPAND)
 
     def menu(self):
         # menu bar
@@ -52,7 +54,7 @@ class Calculator(wx.Frame):
         self.Close()
 
     def grid_sizer(self):
-        vbox = wx.BoxSizer(wx.VERTICAL)
+        # vbox = wx.BoxSizer(wx.VERTICAL)
         gs = wx.GridSizer(4, 4, 5, 5)
         one = wx.Button(self, label="1")
         two = wx.Button(self, label="2")
@@ -89,20 +91,21 @@ class Calculator(wx.Frame):
             (equal, 0, wx.EXPAND),
             (divide, 0, wx.EXPAND),
         ])
-        vbox.Add(gs, proportion=1, flag=wx.EXPAND)
-        self.SetSizer(vbox)
+        return gs
+        # vbox.Add(gs, proportion=1, flag=wx.EXPAND)
+        # self.SetSizer(vbox)
 
     def head(self):
-        panel = wx.Panel()
-        tc = wx.TextCtrl(panel)
+        # panel = wx.Panel()
+        tc = wx.TextCtrl(self)
         vbox = wx.BoxSizer(wx.VERTICAL)
         hbox = wx.BoxSizer(wx.HORIZONTAL)
-        st1 = wx.StaticText(panel, label="Input")
+        st1 = wx.StaticText(self, label="Input")
         hbox.Add(st1, flag=wx.RIGHT, border=8)
         hbox.Add(tc, proportion=1)
-        vbox.Add(hbox, flag=wx.EXPAND | wx.UP | wx.RIGHT | wx.LEFT, border=10)
-        panel.SetSizer(vbox)
-
+        return hbox
+        # vbox.Add(hbox, flag=wx.EXPAND | wx.UP | wx.RIGHT | wx.LEFT, border=10)
+        # panel.SetSizer(vbox)
 
 def main():
 

@@ -28,13 +28,13 @@ while True:
     if not os.path.isfile('log/operation_%i.log' % temp):
         break
     temp += 1
-fhand = open('log/operation_%i.log' % temp, 'a')  # 打开日志文件
+# fhand = open('log/operation_%i.log' % temp, 'a')  # 打开日志文件
 
 
 def write_in(string):
     s = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     s += string + '\n'
-    fhand.write(s)
+    # fhand.write(s)
 
 
 def input_char(gameboard):
@@ -51,11 +51,12 @@ def input_char(gameboard):
 class Game:
     def __init__(self):
         self.rand2 = 0.8  # 随机出现2的概率
-        self.height = 3
-        self.width = 3
+        self.height = 4
+        self.width = 4
         self.score = 0
         self.high_score = 0
-        self.field = [[0 for i in range(self.width)] for j in range(self.height)]
+        self.field = [[0 for i in range(self.width)]
+                      for j in range(self.height)]
         self.message = ''  # 其实没用用
         self.reset()  # 初始化
 
@@ -66,17 +67,19 @@ class Game:
             gameboard.addstr(string + '\n')
 
         def draw_row():
-            cast('+'+"-----+" * self.width)
+            cast('+' + "-----+" * self.width)
 
         gameboard.clear()
-        d = DrawTitle.DrawT(self.width*6, self.message, gameboard, self.score, self.high_score)
+        d = DrawTitle.DrawT(self.width * 6, self.message,
+                            gameboard, self.score, self.high_score)
         d.draw_title()
         d.draw_score()
 
         for i in range(self.height):
             draw_row()
             for j in range(self.width):
-                gameboard.addstr('|{:^5}'.format(self.field[i][j])if self.field[i][j] > 0 else '|     ')
+                gameboard.addstr('|{:^5}'.format(
+                    self.field[i][j])if self.field[i][j] > 0 else '|     ')
             gameboard.addstr('|\n')
         draw_row()
 
@@ -95,7 +98,8 @@ class Game:
             self.message = 'New High Score'
             write_in("New High Score")
         write_in("Game reset")
-        self.field = [[0 for i in range(self.width)] for j in range(self.height)]
+        self.field = [[0 for i in range(self.width)]
+                      for j in range(self.height)]
         self.score = 0
         self.place()
         self.place()
@@ -124,14 +128,15 @@ class Game:
         new = [[0 for i in range(self.width)] for j in range(self.height)]
         for row in range(self.height):
             for column in range(self.width):
-                new[column][self.width-row-1] = self.field[row][column]
+                new[column][self.width - row - 1] = self.field[row][column]
         self.field = new
 
     def move(self, direction):
         """
         操作矩阵
         """
-        temp_matrix = [[0 for i in range(self.width)] for j in range(self.height)]
+        temp_matrix = [[0 for i in range(self.width)]
+                       for j in range(self.height)]
         for i in range(self.height):
             for j in range(self.width):
                 temp_matrix[i][j] = self.field[i][j]
@@ -192,11 +197,11 @@ class Game:
         write_in("There aren't any 0")
         for i in range(0, self.height):
             for j in range(1, self.width):
-                if self.field[i][j] == self.field[i][j-1]:
+                if self.field[i][j] == self.field[i][j - 1]:
                     return 0
         for i in range(0, self.width):
             for j in range(1, self.height):
-                if self.field[j][i] == self.field[j-1][i]:
+                if self.field[j][i] == self.field[j - 1][i]:
                     return 0
         write_in("Game Over\n")
         self.message = "Game Over"
@@ -219,7 +224,7 @@ def main(gameboard):
         flag = 0
         while flag != 1:
             direction = input_char(gameboard)
-            write_in("Input: "+direction)
+            write_in("Input: " + direction)
             if direction == "restart":
                 return "restart"
             elif direction == "quit":
@@ -229,7 +234,6 @@ def main(gameboard):
         game.place()
         if game.game_over():
             return "game_over"
-        game.draw(gameboard)
         return "gaming"
 
     def game_over():
@@ -253,4 +257,3 @@ def main(gameboard):
 
 
 curses.wrapper(main)
-

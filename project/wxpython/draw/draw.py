@@ -35,7 +35,11 @@ class Example(wx.Frame):
 
     def draw_circle(self, circle):
         dc = wx.ClientDC(self)
+        dc.SetPen(wx.Pen(wx.Colour(0, 12, 56)))
         dc.DrawPointList(circle)
+
+        dc.SetBrush(wx.Brush('#785f36'))
+        dc.DrawRectangle(250, 195, 90, 60)
     # def max(self):
     #     self.ShowFullScreen(True)
 
