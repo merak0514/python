@@ -21,9 +21,10 @@ class Calculator(wx.Frame):
         self.menu()
         vbox = wx.BoxSizer(wx.VERTICAL)
         head = self.head()
-        # gs = self.grid_sizer()
+        gs = self.grid_sizer()
         vbox.Add(head, flag=wx.EXPAND | wx.UP | wx.RIGHT | wx.LEFT, border=10)
-        # vbox.Add(gs, proportion=1, flag=wx.EXPAND)
+        vbox.Add(gs, proportion=1, flag=wx.EXPAND)
+        self.SetSizer(vbox)
 
     def menu(self):
         # menu bar
@@ -54,46 +55,12 @@ class Calculator(wx.Frame):
         self.Close()
 
     def grid_sizer(self):
-        # vbox = wx.BoxSizer(wx.VERTICAL)
-        gs = wx.GridSizer(4, 4, 5, 5)
-        one = wx.Button(self, label="1")
-        two = wx.Button(self, label="2")
-        three = wx.Button(self, label="3")
-        four = wx.Button(self, label="4")
-        five = wx.Button(self, label="5")
-        six = wx.Button(self, label="6")
-        seven = wx.Button(self, label="7")
-        eight = wx.Button(self, label="8")
-        nine = wx.Button(self, label="9")
-        zero = wx.Button(self, label="0")
-        add = wx.Button(self, label="+")
-        sub = wx.Button(self, label="-")
-        multiple = wx.Button(self, label="*")
-        divide = wx.Button(self, label="/")
-        point = wx.Button(self, label=".")
-        equal = wx.Button(self, label="=")
-
-        gs.AddMany([
-            (seven, 0, wx.EXPAND),
-            (eight, 0, wx.EXPAND),
-            (nine, 0, wx.EXPAND),
-            (add, 0, wx.EXPAND),
-            (four, 0, wx.EXPAND),
-            (five, 0, wx.EXPAND),
-            (six, 0, wx.EXPAND),
-            (sub, 0, wx.EXPAND),
-            (one, 0, wx.EXPAND),
-            (two, 0, wx.EXPAND),
-            (three, 0, wx.EXPAND),
-            (multiple, 0, wx.EXPAND),
-            (zero, 0, wx.EXPAND),
-            (point, 0, wx.EXPAND),
-            (equal, 0, wx.EXPAND),
-            (divide, 0, wx.EXPAND),
-        ])
+        labels = list(["AC", 'DEL', 'Pi', 'CLOSE'])+list(char for char in "789+456-123*0.=/")
+        gs = wx.GridSizer(5, 4, 5, 5)
+        for label in labels:
+            button = wx.Button(self, label=label)
+            gs.Add(button, flag=wx.EXPAND | wx.ALL)
         return gs
-        # vbox.Add(gs, proportion=1, flag=wx.EXPAND)
-        # self.SetSizer(vbox)
 
     def head(self):
         # panel = wx.Panel()
@@ -102,7 +69,7 @@ class Calculator(wx.Frame):
         hbox = wx.BoxSizer(wx.HORIZONTAL)
         st1 = wx.StaticText(self, label="Input")
         hbox.Add(st1, flag=wx.RIGHT, border=8)
-        hbox.Add(tc, proportion=1)
+        hbox.Add(tc, proportion=1, flag=wx.EXPAND | wx.DOWN | wx.RIGHT | wx.LEFT, border=10)
         return hbox
         # vbox.Add(hbox, flag=wx.EXPAND | wx.UP | wx.RIGHT | wx.LEFT, border=10)
         # panel.SetSizer(vbox)
