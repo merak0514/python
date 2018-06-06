@@ -11,7 +11,8 @@ class Calculator(wx.Frame):
 
     def __init__(self, parent, title):
         super(Calculator, self).__init__(parent, title=title)
-
+        self.output = ''
+        self.result = 0
         self.initUI()
         self.Center()
 
@@ -59,20 +60,49 @@ class Calculator(wx.Frame):
         gs = wx.GridSizer(5, 4, 5, 5)
         for label in labels:
             button = wx.Button(self, label=label)
+            self.add_method(label, button)
             gs.Add(button, flag=wx.EXPAND | wx.ALL)
         return gs
 
     def head(self):
         # panel = wx.Panel()
-        tc = wx.TextCtrl(self)
+        self.tc = wx.TextCtrl(self, style=wx.TE_RIGHT)
         vbox = wx.BoxSizer(wx.VERTICAL)
         hbox = wx.BoxSizer(wx.HORIZONTAL)
         st1 = wx.StaticText(self, label="Input")
         hbox.Add(st1, flag=wx.RIGHT, border=8)
-        hbox.Add(tc, proportion=1, flag=wx.EXPAND | wx.DOWN | wx.RIGHT | wx.LEFT, border=10)
+        hbox.Add(self.tc, proportion=1, flag=wx.EXPAND | wx.DOWN | wx.RIGHT | wx.LEFT, border=10)
         return hbox
         # vbox.Add(hbox, flag=wx.EXPAND | wx.UP | wx.RIGHT | wx.LEFT, border=10)
         # panel.SetSizer(vbox)
+
+    def add_method(self, label, button):
+        if label in "0123456789. Pi":
+            self.Bind(wx.EVT_BUTTON, self.methodNumber, button)
+        elif label == 'CLOSE':
+            self.Bind(wx.EVT_BUTTON, self.methodClose, button)
+        elif label == 'DEL':
+            self.Bind(wx.EVT_BUTTON, self.methodDel, button)
+        elif label == 'AC':
+            self.Bind(wx.EVT_BUTTON, self.methodAC, button)
+
+    def methodNumber(self, event):
+        event_button = event.GetEventObject()
+        label = event_button.GetLabel()
+        self.output += label
+        self.tc.SetValue(self.output)
+
+    def methodClose(self, event):
+        self.on_quit(event)
+
+    def methodDel(self, event):
+        self.output = self.output[:len(self.output)-1]
+        self.tc.SetValue(self.output)
+
+    def methodAC(self, event):
+        self.output = ''
+        self.tc.Clear()
+
 
 def main():
 
