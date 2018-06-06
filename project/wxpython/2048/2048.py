@@ -15,6 +15,7 @@ import wx
 class GameBoard2048(wx.Frame):
     def __init__(self, title):
         super(GameBoard2048, self).__init__(None, title=title)
+        self.matrix = list([2, 4, 8, 2, 0, 4, 0, 2, 4, 0, 0, 8, 2, 0, 0, 0])
         self.init_ui()
 
     def init_ui(self):
@@ -24,6 +25,7 @@ class GameBoard2048(wx.Frame):
         v_box.Add(self.head())
         self.SetSizer(v_box)
         self.SetBackgroundColour('white')  # 设置背景颜色
+        v_box.Add(self.body(), wx.EXPAND, wx.ALIGN_CENTER)
 
     def head(self):
         h_box = wx.BoxSizer(wx.HORIZONTAL)
@@ -31,6 +33,19 @@ class GameBoard2048(wx.Frame):
         font = wx.Font(18, wx.DECORATIVE, wx.ITALIC, wx.NORMAL)  # 设置字体
         static_txt.SetFont(font)
         h_box.Add(static_txt)
+        return h_box
+
+    def body(self):
+        def numbers():
+            gs = wx.GridSizer(4, 4, 5, 5)
+            for num in self.matrix:
+                st = wx.StaticText(self, label=str(num))
+                gs.Add(st, flag=wx.EXPAND | wx.ALL)
+            return gs
+        h_box = wx.BoxSizer(wx.HORIZONTAL)
+        # h_box.AddStretchSpacer()
+        h_box.Add(numbers())
+        # h_box.AddStretchSpacer()
         return h_box
 
     def menu(self):
