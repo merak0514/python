@@ -1,5 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+"""
+亮点：使用eval直接将字符串转化为方程
+"""
 import wx
 
 
@@ -69,6 +72,7 @@ class CalcFrame(wx.Frame):
         string = self.equation
         try:
             target = eval(string)
+            print(string)
             self.equation = str(target)
             self.textprint.SetValue(self.equation)
         except SyntaxError:
