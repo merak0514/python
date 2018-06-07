@@ -8,7 +8,6 @@
 设置背景颜色
 设置字体
 """
-
 import wx
 
 
@@ -60,7 +59,6 @@ class GameBoard2048(wx.Frame):
         self.Bind(wx.EVT_MENU, on_quit, quitor)
         menu1.Append(quitor)
         menu1.Append(reset)
-
 
 
 def main():
