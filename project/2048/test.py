@@ -1,4 +1,4 @@
-# !/merak/desktop/python/
+# !/user/bin/env python
 # @Time     : 9:45
 # @Author   : Merak
 # @File     : test.py

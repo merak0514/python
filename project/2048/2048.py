@@ -1,4 +1,4 @@
-# !/merak/desktop/python
+# !/user/bin/env python
 # @Time     : 19:47
 # @Author   : Merak
 # @File     : 2048.py

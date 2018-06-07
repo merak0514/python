@@ -1,4 +1,4 @@
-# !/merak/desktop/python/
+# !/user/bin/env python
 # @Time     : 8:37
 # @Author   : Merak
 # @File     : DrawTitle.py

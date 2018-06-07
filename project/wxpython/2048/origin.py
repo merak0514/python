@@ -1,4 +1,4 @@
-# !/merak/desktop/python/project/origin
+# !/user/bin/env python
 # -*- coding: utf-8 -*-
 # @Time     : 0:20
 # @Author   : Merak

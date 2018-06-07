@@ -1,4 +1,4 @@
-# !/merak/desktop/python/project/wxpython/calculator/calculator
+# !/user/bin/env python
 # -*- coding: utf-8 -*-
 # @Time     : 9:19
 # @Author   : Merak

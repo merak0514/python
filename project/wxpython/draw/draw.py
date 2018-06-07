@@ -1,4 +1,4 @@
-# !/merak/desktop/python/project/wxpython/draw
+# !/user/bin/env python
 # -*- coding: utf-8 -*-
 # @Time     : 16:09
 # @Author   : Merak
