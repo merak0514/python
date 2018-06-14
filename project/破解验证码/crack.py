@@ -7,9 +7,12 @@
 
 from PIL import Image
 import re
+import os
+
 grey_list = []
 front_color_set = []  # 主体部分使用颜色集
 background_color = 255  # 背景部分颜色集
+parent_set = list()
 
 
 def cut_picture(im):
@@ -88,7 +91,51 @@ def sort_color(im):
     print(background_color, front_color_set)
 
 
-im = Image.open("python_captcha/captcha.gif")
-im_new = to_grey(im)
+def train():
+    global parent_set
+    for i in list('0123456789qazwsxedcrfvtgbyhnujmikolp'):
+        base_path = "python_captcha/iconset/{}/".format(i)
+        for file_name in os.listdir(base_path):
+            if file_name != 'Thumbs.db' and file_name != '.DS_Store':
+                im = Image.open(base_path + file_name)
+                temp = im_to_vector(im)
+                parent_set.append({i: temp})
+
+
+def im_to_vector(im: Image.Image):
+    """
+    获得的向量是由从数字黑白图开始到结束的像素构成
+    返回的向量是一个dict，其中键为从数字开端开始横向计数的像素编号
+    会删去末尾的空白
+    :param im: Image.Image
+    :return: dict
+    """
+    flag = 0  # 还未找到第一个字符
+    vector = dict()
+    count = 0
+    im.convert('1')
+    for j in range(im.size[1]):
+        for i in range(im.size[0]):
+            pixel = im.getpixel((i, j))
+            if flag == 0 and pixel == 0:
+                vector[count] = pixel
+                flag = 1
+                count += 1
+            elif flag == 1:
+                vector[count] = pixel
+                count += 1
+    for i in range(count):
+        if vector[count - i - 1] == 255:
+            del(vector[count - i - 1])
+            continue
+        break
+    print(vector)
+    return vector
+
+
+image = Image.open("python_captcha/captcha.gif")
+im_new = to_grey(image)
 im_new.save('black.gif', 'GIF')
 cut_picture(im_new)
+train()
+print(parent_set)
