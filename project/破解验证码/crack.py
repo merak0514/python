@@ -18,17 +18,19 @@ def cut_picture(im):
     row_set = list()  # 切割点的行号
     flag1 = 0
     flag2 = 0
+    temp = -1
+    im_set = list()
     print(im.size)
     for i in range(im.size[0]):  # 获得需要切割的列号
         for j in range(im.size[1]):
             if im.getpixel((i, j)) != background_color:
                 if flag1 == 0:
-                    column_set.append(i)
+                    temp = i
                 flag1 = 1  # 进入字母前的列标采集完成
                 break
         else:
             if flag1 == 1:
-                column_set.append(i)
+                column_set.append((temp, i))
                 flag1 = 0  # 离开字母的列标采集完成
     for j in range(im.size[1]):  # 获得需要切割的行号
         for i in range(im.size[0]):
@@ -42,6 +44,10 @@ def cut_picture(im):
                 row_set.append(j)
                 break
     print(column_set, row_set)
+    for i in column_set:
+        temp_im = im.crop((i[0], row_set[0], i[1], row_set[1]))
+        im_set.append(temp_im)
+    print(im_set)
 
 
 def to_grey(im):
