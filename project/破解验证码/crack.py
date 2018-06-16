@@ -5,9 +5,7 @@
 # @File     : crack.py
 # @Software : PyCharm
 import math
-
 from PIL import Image
-import re
 import os
 
 grey_list = list()
@@ -19,6 +17,9 @@ parent_set = list()  # 父集
 
 
 class VectorComparator:
+    """
+    对比向量的类
+    """
     def __init__(self, vector1: dict, vector2: dict):
         self.vector1 = vector1
         self.vector2 = vector2
@@ -42,7 +43,12 @@ class VectorComparator:
         return self.dot_product() / (self.vector1_len * self.vector2_len)
 
 
-def cut_picture(im):
+def cut_picture(im: Image.Image):
+    """
+    切割图片
+    储存在cut_im_set
+    :param im: Image.Image
+    """
     im.convert('1')
     column_set = list()  # 切割点所在列号
     row_set = list()  # 切割点的行号
@@ -82,7 +88,11 @@ def cut_picture(im):
     cut_im_set = im_set
 
 
-def to_grey(im):
+def to_grey(im: Image.Image):
+    """
+    把图片转换为黑白两色图
+    :param im: Image.Image
+    """
     im.convert('P')
     sort_color(im)  # 得到有用的颜色集
     new_im = Image.new("1", im.size,  255)
@@ -94,7 +104,12 @@ def to_grey(im):
     return new_im
 
 
-def sort_color(im):
+def sort_color(im: Image.Image):
+    """
+    寻找出现最频繁的颜色，把它们区分为背景和主体颜色
+    失败，手动设置
+    :param im: Image.Image
+    """
     global front_color_set, background_color
     his = im.histogram()
     value = {}
@@ -121,6 +136,10 @@ def sort_color(im):
 
 
 def train():
+    """
+    训练，打开文件，把所有的字母图片打开，转换为向量
+    结果储存在parent_set
+    """
     global parent_set
     for i in list('0123456789qazwsxedcrfvtgbyhnujmikolp'):
         base_path = "python_captcha/iconset/{}/".format(i)
