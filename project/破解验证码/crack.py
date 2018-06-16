@@ -4,15 +4,42 @@
 # @Author   : Merak
 # @File     : crack.py
 # @Software : PyCharm
+import math
 
 from PIL import Image
 import re
 import os
 
-grey_list = []
-front_color_set = []  # 主体部分使用颜色集
+grey_list = list()
+cut_im_set = list()
+cut_im_vector_set = list()
+front_color_set = list()  # 主体部分使用颜色集
 background_color = 255  # 背景部分颜色集
-parent_set = list()
+parent_set = list()  # 父集
+
+
+class VectorComparator:
+    def __init__(self, vector1: dict, vector2: dict):
+        self.vector1 = vector1
+        self.vector2 = vector2
+        self.vector1_len = self.magnitude(self.vector1)
+        self.vector2_len = self.magnitude(self.vector2)
+
+    def magnitude(self, vector: dict):
+        length = 0
+        for i in vector.values():
+            length += i * i
+        return math.sqrt(length)
+
+    def dot_product(self):
+        total = 0
+        for (i, j) in self.vector1.items():
+            if i in self.vector2:
+                total += j * self.vector2[i]
+        return total
+
+    def cos(self):
+        return self.dot_product() / (self.vector1_len * self.vector2_len)
 
 
 def cut_picture(im):
@@ -23,7 +50,7 @@ def cut_picture(im):
     flag2 = 0
     temp = -1
     im_set = list()
-    print(im.size)
+    # print(im.size)
     for i in range(im.size[0]):  # 获得需要切割的列号
         for j in range(im.size[1]):
             if im.getpixel((i, j)) != background_color:
@@ -46,11 +73,13 @@ def cut_picture(im):
             if flag2 == 1:
                 row_set.append(j)
                 break
-    print(column_set, row_set)
+    # print(column_set, row_set)
     for i in column_set:
         temp_im = im.crop((i[0], row_set[0], i[1], row_set[1]))
         im_set.append(temp_im)
-    print(im_set)
+    # print(im_set)
+    global cut_im_set
+    cut_im_set = im_set
 
 
 def to_grey(im):
@@ -88,7 +117,7 @@ def sort_color(im):
         #         break
     # 我日这样不行，手动设置
     front_color_set = [220, 227]
-    print(background_color, front_color_set)
+    # print(background_color, front_color_set)
 
 
 def train():
@@ -129,7 +158,7 @@ def im_to_vector(im: Image.Image):
             del(vector[count - i - 1])
             continue
         break
-    print(vector)
+    # print(vector)
     return vector
 
 
@@ -138,4 +167,16 @@ im_new = to_grey(image)
 im_new.save('black.gif', 'GIF')
 cut_picture(im_new)
 train()
-print(parent_set)
+for image in cut_im_set:
+    image_vector = im_to_vector(image)
+    cut_im_vector_set.append(image_vector)
+
+    guess_set = list()
+    for parent_vector in parent_set:
+        # print(list(parent_vector.values())[0])
+        # print('image', image_vector)
+        v = VectorComparator(list(parent_vector.values())[0], image_vector)
+        cos = v.cos()
+        guess_set.append((list(parent_vector.keys())[0], cos))
+    guess_set.sort(key=lambda x: x[1], reverse=True)
+    print(guess_set[0])
