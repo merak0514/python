@@ -2,7 +2,6 @@
 # 思想：把rgb转化为灰度，把256位的灰度值映射到字符表上
 
 from PIL import Image
-import argparse
 import re
 
 picture_name = ''
@@ -27,6 +26,7 @@ def get_picture():
     except:
         print('No such file')
         quit()
+    picture_name = "converted/" + re.findall("\S+?/(\S+)", picture_name)[0]
     print(im.size)
     width = im.size[0]
     height = im.size[1]
@@ -55,8 +55,7 @@ if __name__ == '__main__':
             txt += get_char(*im.getpixel((j, i)))
         txt += 'x\n'
     txt += '*/\n'
-    picture_name = re.findall('(\w+)\.', picture_name)[0]
-
+    picture_name = re.findall('(\S+)\.', picture_name)[0]
     fhand = open(picture_name + '.cpp', 'wb')
     fhand.write(txt.encode())
     print("Done!")
