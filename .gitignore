@@ -3,9 +3,12 @@ certificates/
 *.pyproj
 *.idea
 __pycache__/
-*.jpg
-*.png
-*.jpeg
+
 *.log
 log/
 *.pdf
+
+*.jpg
+*.png
+*.jpeg
+temp/s
