@@ -14,7 +14,9 @@ from bs4 import BeautifulSoup as Bs
 import re
 
 local_address = "download/"
-
+school_id = 'XJTU'
+course_id = '1001756006'
+tid = '1002649017'
 
 def test(link):
     html = requests.get(link)
@@ -31,10 +33,10 @@ def get():
     pass
 
 
-def download(link):
+def download(pdf_code):
     """
     下载单个pdf文件
-    :param link: str
+    :param pdf_code: str
     :return:
     """
     batch_id = round(time.time() * 1000)
@@ -49,7 +51,7 @@ def download(link):
         "DNT": "1",
         "Content-Type": "text/plain",
         "Accept": "*/*",
-        "Referer": "https://www.icourse163.org/learn/XJTU-1001756006?tid=1002649017",
+        "Referer": "https://www.icourse163.org/learn/" + school_id + "-" + course_id + "?tid=" + "term_id",
         "Accept-Encoding": "gzip, deflate, br",
         "Accept-Language": "zh-CN,zh;q=0.9",
     }
@@ -60,10 +62,10 @@ def download(link):
         "c0-scriptName": "CourseBean",
         "c0-methodName": "getLessonUnitLearnVo",
         "c0-id": 0,
-        "c0-param0": "number: 1004700192",
+        "c0-param0": "number: " + pdf_code,
         "c0-param1": "number: 3",
         "c0-param2": "number: 0",
-        "c0-param3": "number: 1004311624",
+        "c0-param3": "number: " + "1004311621",
         "batchId": batch_id,
     }
     a = requests.post(download_host, headers=headers, data=data)
@@ -72,9 +74,11 @@ def download(link):
     print(download_address)
     try:
         pdf = requests.get(download_address)
-        with open(local_address + "test" + ".pdf", "wb") as file:
+        with open(local_address + "test2" + ".pdf", "wb") as file:
             file.write(pdf.content)
-    except:
+    except OSError:
+        print('读写失败！')
+    else:
         print('Wrong!')
 
 
@@ -83,6 +87,5 @@ if __name__ == '__main__':
     url = "https://www.icourse163.org/" \
           "learn/XJTU-1001756006?tid=1002649017"
     # test(url)
-    school_id = 'XJTU'
 
-    download(1)
+    download("1004576030")
