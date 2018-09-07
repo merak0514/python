@@ -7,6 +7,14 @@
 """
 地址格式: https://www.icourse163.org/learn/+[school]-[course_id]?tid=[term_id]
 e.g.: https://www.icourse163.org/learn/XJTU-1001756006?tid=1002649017
+资源格式: https://www.icourse163.org/learn/+[school]-[course_id]?tid=[term_id]#/learn/content?\
+        type=detail&id=[unit_id]&cid=[source_id]
+e.g.: https://www.icourse163.org/learn/XJTU-1001756006?tid=1002649017#/learn/content?\
+        type=detail&id=1003627038&cid=1004311624
+在dwr中表示为: lesson_id, id
+获得目录：[POST] CourseBean.getMocTermDto.dwr
+获得下载链接：[POST] CourseBean.getLessonUnitLearnVo.dwr
+下载：[GET]
 """
 import time
 import requests
@@ -17,6 +25,7 @@ local_address = "download/"
 school_id = 'XJTU'
 course_id = '1001756006'
 tid = '1002649017'
+
 
 def test(link):
     html = requests.get(link)
@@ -29,14 +38,17 @@ def test(link):
         print(u)
 
 
-def get():
-    pass
+def get_catalogue():
+    """
+    得到目录列表
+    :return:
+    """
 
 
 def download(pdf_code):
     """
     下载单个pdf文件
-    :param pdf_code: str
+    :param pdf_code: str pdf对应的代码
     :return:
     """
     batch_id = round(time.time() * 1000)
@@ -78,8 +90,11 @@ def download(pdf_code):
             file.write(pdf.content)
     except OSError:
         print('读写失败！')
-    else:
+        return 1
+    except:
         print('Wrong!')
+        return 1
+    return 0
 
 
 if __name__ == '__main__':
