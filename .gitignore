@@ -3,6 +3,7 @@ certificates/
 *.pyproj
 *.idea
 __pycache__/
+venv/
 
 *.log
 log/
