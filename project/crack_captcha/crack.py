@@ -181,21 +181,22 @@ def im_to_vector(im: Image.Image):
     return vector
 
 
-image = Image.open("python_captcha/captcha.gif")
-im_new = to_grey(image)
-im_new.save('black.gif', 'GIF')
-cut_picture(im_new)
-train()
-for image in cut_im_set:
-    image_vector = im_to_vector(image)
-    cut_im_vector_set.append(image_vector)
+if __name__ == '__main__':
+    image = Image.open("python_captcha/captcha.gif")
+    im_new = to_grey(image)
+    im_new.save('black.gif', 'GIF')
+    cut_picture(im_new)
+    train()
+    for image in cut_im_set:
+        image_vector = im_to_vector(image)
+        cut_im_vector_set.append(image_vector)
 
-    guess_set = list()
-    for parent_vector in parent_set:
-        # print(list(parent_vector.values())[0])
-        # print('image', image_vector)
-        v = VectorComparator(list(parent_vector.values())[0], image_vector)
-        cos = v.cos()
-        guess_set.append((list(parent_vector.keys())[0], cos))
-    guess_set.sort(key=lambda x: x[1], reverse=True)
-    print(guess_set[0])
+        guess_set = list()
+        for parent_vector in parent_set:
+            # print(list(parent_vector.values())[0])
+            # print('image', image_vector)
+            v = VectorComparator(list(parent_vector.values())[0], image_vector)
+            cos = v.cos()
+            guess_set.append((list(parent_vector.keys())[0], cos))
+        guess_set.sort(key=lambda x: x[1], reverse=True)
+        print(guess_set[0])
