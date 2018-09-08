@@ -31,7 +31,6 @@ tid = '1002649017'  # term id
 def test():
     """
     出现<Response [200]>即可
-    :return:
     """
     link = 'https://www.icourse163.org/' \
            'learn/XJTU-1001756006?tid=1002649017'
@@ -110,7 +109,7 @@ def download(info):
     """
     下载单个pdf文件
     :param info: dictionary pdf对应的代码
-    :return:
+    :return: 0: 成功; 1:失败
     """
     pdf_id = info['pdf_id']
     lesson_id = info['lesson_id']
