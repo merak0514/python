@@ -32,10 +32,7 @@ class Login:
             'savelogin': self.savelogin,
         }
         req = requests.post(self.host, data=data)
-        print(req.text)
-        print(req.cookies)
-        test = requests.get('https://www.icourse163.org', cookies=req.cookies)
-        print(test.text)
+        jar = req.cookies
 
 
 if __name__ == '__main__':
