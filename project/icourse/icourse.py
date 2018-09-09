@@ -45,18 +45,10 @@ def test():
 
 def get_headers():
     headers = {
-        'Host': 'www.icourse163.org',
-        'Connection': 'keep-alive',
-        'Content-Length': '280',
-        'Origin': 'https://www.icourse163.org',
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 '
                       '(KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36',
         'DNT': '1',
-        'Content-Type': 'text/plain',
-        'Accept': '*/*',
         'Referer': 'https://www.icourse163.org/learn/' + school_id + '-' + course_id + '?tid=' + tid,
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Accept-Language': 'zh-CN,zh;q=0.9',
     }
     return headers
 
@@ -161,13 +153,14 @@ def download_all():
             print('输入有误')
     for i in catalog:
         print('正在下载第{}份pdf'.format(downloading))
-        if download(i) == 1:
+        if download(i) == 0:
+            print('第{}份pdf下载成功'.format(downloading))
+        else:
             print('第{}份pdf下载失败'.format(downloading))
         downloading += 1
     print('下载完成')
 
 
 if __name__ == '__main__':
-
-    test()
+    # test()
     download_all()
