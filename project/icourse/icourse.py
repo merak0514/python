@@ -65,7 +65,6 @@ def get_catalogue():
     data = {
         'callCount': 1,
         'scriptSessionId': '${scriptSessionId}190',
-        'httpSessionId': '5f5c7b6b5448441c9a615b84593a4c6f',
         'c0-scriptName': 'CourseBean',
         'c0-methodName': 'getMocTermDto',
         'c0-id': 0,
@@ -112,7 +111,6 @@ def download(info):
     data = {
         'callCount': 1,
         'scriptSessionId': '${scriptSessionId}190',
-        'httpSessionId': 'fd621056c8464bc3bc4bf24ced87737e',
         'c0-scriptName': 'CourseBean',
         'c0-methodName': 'getLessonUnitLearnVo',
         'c0-id': 0,

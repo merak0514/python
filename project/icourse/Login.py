@@ -12,29 +12,34 @@ class Login:
         self.headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 \
                       (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36',
-            'Referer': 'https://www.icourse163.org/member/login.htm',
             'origin': 'https://www.icourse163.org',
         }
         self.username = ''
         self.passwd = ''
         self.savelogin = True
         self.host = 'https://www.icourse163.org/passport/reg/icourseLogin.do'
+        self.cookies = ''
 
-    def set(self):
-        self.username = 'phx001@163.com'
-        self.passwd = 'a123123'
+    def set(self, usn, psd, savelogin=True):
+        self.username = usn
+        self.passwd = psd
+        self.savelogin = savelogin
 
-    def login(self):
-        self.set()
+    def login(self, usn, psd, savelogin=True):
+        self.set(usn, psd, savelogin)
         data = {
             'username': self.username,
             'passwd': self.passwd,
             'savelogin': self.savelogin,
         }
         req = requests.post(self.host, data=data)
-        jar = req.cookies
+        self.cookies = req.cookies
+        print(self.cookies)
+
+    def get_cookies(self):
+        return self.cookies
 
 
 if __name__ == '__main__':
     login = Login()
-    login.login()
+    login.login('phx001@163.com', 'a123123')
