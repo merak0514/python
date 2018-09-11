@@ -5,20 +5,32 @@
 # @File     : download_code.py
 # @Software : PyCharm
 """
-nickName字段获得名字
 score字段获得分数
 答卷格式：http://www.icourse163.org/learn/XJTU-[course_id]?tid=[term_id]#/learn/ojhw?id=[test_id/tid]&aid=[answer_id/aid]
 getOJQuizPaperDto.dwr
 c++: ojLanguage = 2
+
 """
 import re
 import Login
 import time
 import requests
+import json
 
 
 def batch_id():
     return round(time.time() * 1000)
+
+
+def get_account():
+    """
+    读取account文件得到用户名密码
+    :return: json
+    :rtype: dict
+    """
+    with open('data/account.json') as file:
+        js = json.load(file)
+    return js
 
 
 class DownloadCode(object):
@@ -62,7 +74,7 @@ class DownloadCode(object):
         }
         host = 'https://www.icourse163.org/dwr/call/plaincall/PublishCourseBean.getTermsByTeacher.dwr'
         req = requests.post(host, headers=self.headers, data=data, cookies=self.cookies)
-        print(req.text)
+        # print(req.text)
         split = req.text.split('\n')
 
         for line in split:
@@ -75,13 +87,36 @@ class DownloadCode(object):
         print(self.terms)
         return 0
 
+    def get_moc_data(self, term):
+        """
+        根据输入的学期查询所有的练习
+        :param term: 第几学期
+        :type term: int
+        :return: req.text if success else 1
+        """
+        term_id = self.terms[term-1]['term_id'] if int(self.terms[term-1]['term']) == int(term) else -1
+        if term_id == -1:
+            print('terms没有按照顺序！')
+            return 1
+        print(term_id)
+        host = 'http://www.icourse163.org/dwr/call/plaincall/MocScoreManagerBean.getMocTermDataStatisticDto.dwr'
+        data = {
+            'callCount': '1',
+            'scriptSessionId': '${scriptSessionId}190',
+            'c0-scriptName': 'MocScoreManagerBean',
+            'c0-methodName': 'getMocTermDataStatisticDto',
+            'c0-id': 0,
+            'c0-param0': 'string: ' + term_id,
+            'batchId': batch_id()
+        }
+        req = requests.post(host, headers=self.headers, data=data, cookies=self.cookies)
+        return req.text
+
 
 if __name__ == '__main__':
 
-    account_info = {
-        'username': input('username: '),
-        'passwd': input('passwd: ')
-    }
+    account_info = get_account()
     download = DownloadCode(account_info)
     download.login()
     download.get_term_info()
+    download.get_moc_data(1)
