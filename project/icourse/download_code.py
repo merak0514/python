@@ -9,7 +9,8 @@ score字段获得分数
 答卷格式：http://www.icourse163.org/learn/XJTU-[course_id]?tid=[term_id]#/learn/ojhw?id=[test_id/tid]&aid=[answer_id/aid]
 getOJQuizPaperDto.dwr
 c++: ojLanguage = 2
-
+单元测试：type=2
+oj测试：type=7
 """
 import re
 import Login
@@ -110,7 +111,24 @@ class DownloadCode(object):
             'batchId': batch_id()
         }
         req = requests.post(host, headers=self.headers, data=data, cookies=self.cookies)
-        return req.text
+        content = req.text.encode().decode('unicode_escape')  # 转换为中文
+        for line in content:
+            if re.findall('type=7', line):
+                info = {
+                    'name': re.findall('name="(.+)"', line)[0],
+                    'id': re.findall('id="([0-9]+)"', line)[0],
+                    'avgScore': re.findall('avgScore="([0-9]+)"', line)[0],
+                    'releaseTime': re.findall('releaseTime="([0-9]+)"', line)[0],
+                    'deadline': re.findall('deadline="([0-9]+)"', line)[0],
+                    'chapterId': re.findall('chapterId="([0-9]+)"', line)[0],
+                    'evaluateScoreReleaseTime': re.findall('evaluateScoreReleaseTime="([0-9]+)"', line)[0],
+                    'sbjTotalScore': re.findall('sbjTotalScore="([0-9]+)"', line)[0],
+                    'termId': re.findall('termId="([0-9]+)"', line)[0],
+                    'submitTestCount': re.findall('submitTestCount="([0-9]+)"', line)[0],
+                    'type': 7,
+
+                }
+
 
 
 if __name__ == '__main__':
