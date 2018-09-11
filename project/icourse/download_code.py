@@ -12,11 +12,13 @@ c++: ojLanguage = 2
 单元测试：type=2
 oj测试：type=7
 """
+from __future__ import unicode_literals
 import re
 import Login
 import time
 import requests
 import json
+
 
 
 def batch_id():
@@ -45,6 +47,8 @@ class DownloadCode(object):
             'origin': 'https://www.icourse163.org',
         }
         self.terms = []
+        self.oj_set = []
+        self.test_set = []
 
     def login(self):
         """
@@ -85,7 +89,7 @@ class DownloadCode(object):
                     'term_id': re.findall('s[0-9]+\.termId=([0-9]+)', line)[0],
                 }
                 self.terms.append(term)
-        print(self.terms)
+        # print(self.terms)
         return 0
 
     def get_moc_data(self, term):
@@ -111,24 +115,56 @@ class DownloadCode(object):
             'batchId': batch_id()
         }
         req = requests.post(host, headers=self.headers, data=data, cookies=self.cookies)
-        content = req.text.encode().decode('unicode_escape')  # 转换为中文
-        for line in content:
-            if re.findall('type=7', line):
-                info = {
-                    'name': re.findall('name="(.+)"', line)[0],
-                    'id': re.findall('id="([0-9]+)"', line)[0],
-                    'avgScore': re.findall('avgScore="([0-9]+)"', line)[0],
-                    'releaseTime': re.findall('releaseTime="([0-9]+)"', line)[0],
-                    'deadline': re.findall('deadline="([0-9]+)"', line)[0],
-                    'chapterId': re.findall('chapterId="([0-9]+)"', line)[0],
-                    'evaluateScoreReleaseTime': re.findall('evaluateScoreReleaseTime="([0-9]+)"', line)[0],
-                    'sbjTotalScore': re.findall('sbjTotalScore="([0-9]+)"', line)[0],
-                    'termId': re.findall('termId="([0-9]+)"', line)[0],
-                    'submitTestCount': re.findall('submitTestCount="([0-9]+)"', line)[0],
+        c = re.compile('description=.*?;')
+
+        o = re.sub(c, '', req.text)
+        content = o.encode().decode('unicode_escape')  # 转换为中文
+        m = re.sub(c, '', content)
+        print(o)
+        with open('data/tempGetMocTermDataStatisticDto.dwr', 'wb') as file:
+            file.write(content.encode('utf-8'))
+            file.close()
+        file = open('data/tempGetMocTermDataStatisticDto.dwr', 'rb')
+        # print(file)
+        for line in file:
+            content = line.decode('utf-8')
+            # print(content)
+            if re.findall('type=7', content) and re.findall('name=', content):
+                print(content)
+                oj_info = {
+                    'name': re.findall('name="(.+)"', content)[0],
+                    'id': re.findall('id=(.+?);', content)[0] if re.findall('id=(.+?);', content)[0] else '-1',
+                    'chapterId': re.findall('chapterId=(.+?);', content)[0],
+                    'avgScore': re.findall('avgScore=(.+?);', content)[0],
+                    'releaseTime': re.findall('releaseTime=(.+?);', content)[0],
+                    'deadline': re.findall('deadline=(.+?);', content)[0],
+                    'evaluateScoreReleaseTime': re.findall('evaluateScoreReleaseTime=.+;', content)[0],
+                    'sbjTotalScore': re.findall('sbjTotalScore=(.+?);', content)[0],
+                    'termId': re.findall('termId=(.+?);', content)[0],
+                    'submitTestCount': re.findall('submitTestCount=(.+?);', content)[0],
                     'type': 7,
+                }
+                self.oj_set.append(oj_info)
+            if re.findall('type=2', content) and re.findall('name=', content):
+                print(content)
+                test_info = {
+                    'name': re.findall('name="(.+)"', content)[0],
+                    'id': re.findall('id=(.+?);', content)[0],
+                    'chapterId': re.findall('chapterId=(.+?);', content)[0],
+                    'avgScore': re.findall('avgScore=(.+?);', content)[0],
+                    'releaseTime': re.findall('releaseTime=(.+?);', content)[0],
+                    'deadline': re.findall('deadline=(.+?);', content)[0],
+                    'evaluateScoreReleaseTime': re.findall('evaluateScoreReleaseTime=(.+?);', content)[0],
+                    'ojTotalScore': re.findall('sbjTotalScore=(.+?);', content)[0],
+                    'termId': re.findall('termId=(.+?);', content)[0],
+                    'submitTestCount': re.findall('submitTestCount=(.+?);', content)[0],
+                    'testRandomSetting': re.findall('testRandomSetting=(.+)', content)[0],
+                    'type': 2,
 
                 }
-
+                self.test_set.append(test_info)
+        print(self.oj_set)
+        print(self.test_set)
 
 
 if __name__ == '__main__':
