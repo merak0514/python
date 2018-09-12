@@ -18,6 +18,8 @@ import time
 import requests
 import json
 import os
+import random_ua
+import AutoDownloader
 
 
 def batch_id():
@@ -47,15 +49,21 @@ class DownloadCode(object):
         self.passwd = account['passwd']
         self.cookies = ''
         self.headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 6.2; WOW64; rv:22.0) Gecko/20100101 Firefox/22.0',
-                # 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 \
-                #       (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36',
-            'origin': 'https://www.icourse163.org',
+            # 'User-Agent': 'Mozilla/5.0 (Windows NT 6.2; WOW64; rv:22.0) Gecko/20100101 Firefox/22.0',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 \
+                  (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36',
         }
         self.terms = []
         self.oj_set = []
         self.test_set = []
         self.download_path = "H:/data/"
+        self.ua = random_ua.UserAgent()
+
+    def new_headers(self):
+        self.headers = {
+            'User-Agent': self.ua.random()
+        }
+        print(self.headers)
 
     def login(self):
         """
@@ -189,7 +197,7 @@ class DownloadCode(object):
                 'c0-methodName': 'getStudentScoresByTestId',
                 'c0-id': 0,
                 'c0-param0': 'string: ' + str(oj['id']),
-                'c0-param1': 'number:20',
+                'c0-param1': 'number:100',
                 'c0-param2': 'number:' + str(page),
                 'c0-param3': 'null:null',
                 'c0-param4': 'number:1',
@@ -201,7 +209,6 @@ class DownloadCode(object):
             break
 
 
-
     def auto_download(self):
         pass
 
@@ -209,7 +216,7 @@ class DownloadCode(object):
 
 
 if __name__ == '__main__':
-
+    #
     account_info = get_account()
     download = DownloadCode(account_info)
     download.login()
