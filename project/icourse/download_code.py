@@ -12,13 +12,12 @@ c++: ojLanguage = 2
 单元测试：type=2
 oj测试：type=7
 """
-from __future__ import unicode_literals
 import re
 import Login
 import time
 import requests
 import json
-
+import os
 
 
 def batch_id():
@@ -36,19 +35,27 @@ def get_account():
     return js
 
 
+def new_folder(folder_path):
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+        print('{} created'.format(folder_path))
+
+
 class DownloadCode(object):
     def __init__(self, account):
         self.username = account['username']
         self.passwd = account['passwd']
         self.cookies = ''
         self.headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 \
-                      (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 6.2; WOW64; rv:22.0) Gecko/20100101 Firefox/22.0',
+                # 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 \
+                #       (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36',
             'origin': 'https://www.icourse163.org',
         }
         self.terms = []
         self.oj_set = []
         self.test_set = []
+        self.download_path = "H:/data/"
 
     def login(self):
         """
@@ -90,6 +97,7 @@ class DownloadCode(object):
                 }
                 self.terms.append(term)
         # print(self.terms)
+        req.close()
         return 0
 
     def get_moc_data(self, term):
@@ -103,7 +111,6 @@ class DownloadCode(object):
         if term_id == -1:
             print('terms没有按照顺序！')
             return 1
-        print(term_id)
         host = 'http://www.icourse163.org/dwr/call/plaincall/MocScoreManagerBean.getMocTermDataStatisticDto.dwr'
         data = {
             'callCount': '1',
@@ -116,23 +123,16 @@ class DownloadCode(object):
         }
         req = requests.post(host, headers=self.headers, data=data, cookies=self.cookies)
         c = re.compile('description=.*?;')
-
-        o = re.sub(c, '', req.text)
-        content = o.encode().decode('unicode_escape')  # 转换为中文
-        m = re.sub(c, '', content)
-        print(o)
+        content = re.sub(c, '', req.text).encode().decode('unicode_escape')  # 转换为中文
         with open('data/tempGetMocTermDataStatisticDto.dwr', 'wb') as file:
             file.write(content.encode('utf-8'))
             file.close()
         file = open('data/tempGetMocTermDataStatisticDto.dwr', 'rb')
-        # print(file)
         for line in file:
             content = line.decode('utf-8')
-            # print(content)
             if re.findall('type=7', content) and re.findall('name=', content):
-                print(content)
                 oj_info = {
-                    'name': re.findall('name="(.+)"', content)[0],
+                    'name': re.findall('name="(.+?)";', content)[0],
                     'id': re.findall('id=(.+?);', content)[0] if re.findall('id=(.+?);', content)[0] else '-1',
                     'chapterId': re.findall('chapterId=(.+?);', content)[0],
                     'avgScore': re.findall('avgScore=(.+?);', content)[0],
@@ -148,7 +148,7 @@ class DownloadCode(object):
             if re.findall('type=2', content) and re.findall('name=', content):
                 print(content)
                 test_info = {
-                    'name': re.findall('name="(.+)"', content)[0],
+                    'name': re.findall('name="(.+?)";', content)[0],
                     'id': re.findall('id=(.+?);', content)[0],
                     'chapterId': re.findall('chapterId=(.+?);', content)[0],
                     'avgScore': re.findall('avgScore=(.+?);', content)[0],
@@ -165,6 +165,47 @@ class DownloadCode(object):
                 self.test_set.append(test_info)
         print(self.oj_set)
         print(self.test_set)
+        req.close()
+
+    def begin_download(self):
+        host = 'http://www.icourse163.org/dwr/call/plaincall/MocScoreManagerBean.getStudentScoresByTestId.dwr'
+        term = 1
+        self.download_path += 'term' + str(term) + '/'
+        new_folder(self.download_path)
+        self.get_moc_data(term)  # 更新对应学期的课程列表
+        for i in range(1, len(self.oj_set)-1):
+            oj = self.oj_set[i]
+            folder_name = oj['name']
+            new_folder(self.download_path+folder_name)
+            term_id = self.terms[term - 1]['term_id'] if int(self.terms[term - 1]['term']) == int(term) else -1
+            if term_id == -1:
+                print('terms没有按照顺序！')
+                return 1
+            page = 1
+            data = {
+                'callCount': '1',
+                'scriptSessionId': '${scriptSessionId}190',
+                'c0-scriptName': 'MocScoreManagerBean',
+                'c0-methodName': 'getStudentScoresByTestId',
+                'c0-id': 0,
+                'c0-param0': 'string: ' + str(oj['id']),
+                'c0-param1': 'number:20',
+                'c0-param2': 'number:' + str(page),
+                'c0-param3': 'null:null',
+                'c0-param4': 'number:1',
+                'batchId': batch_id(),
+            }
+            print(data)
+            req = requests.post(host, headers=self.headers, data=data, cookies=self.cookies)
+            print(req.text)
+            break
+
+
+
+    def auto_download(self):
+        pass
+
+
 
 
 if __name__ == '__main__':
@@ -174,3 +215,5 @@ if __name__ == '__main__':
     download.login()
     download.get_term_info()
     download.get_moc_data(1)
+    time.sleep(1)
+    download.begin_download()
