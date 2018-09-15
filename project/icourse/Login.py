@@ -35,6 +35,7 @@ class Login:
         req = requests.post(self.host, data=data)
         self.cookies = req.cookies
         print(self.cookies)
+        req.close()
 
     def get_cookies(self):
         return self.cookies
