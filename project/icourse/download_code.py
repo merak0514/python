@@ -20,6 +20,8 @@ import json
 import os
 import random_ua
 import AutoDownloader
+import GetData
+import random
 
 
 def batch_id():
@@ -39,31 +41,39 @@ def get_account():
 
 def new_folder(folder_path):
     if not os.path.exists(folder_path):
-        os.makedirs(folder_path)
-        print('{} created'.format(folder_path))
+        try:
+            os.makedirs(folder_path)
+        except FileNotFoundError:
+            y = input('系统找不到指定的路径。' + folder_path)
+            return 1
+        else:
+            print('{} created'.format(folder_path))
+            return 0
+    else:
+        print('{} existed'.format(folder_path))
 
 
 class DownloadCode(object):
     def __init__(self, account):
+        self.ua = random_ua.UserAgent()
         self.username = account['username']
         self.passwd = account['passwd']
         self.cookies = ''
         self.headers = {
             # 'User-Agent': 'Mozilla/5.0 (Windows NT 6.2; WOW64; rv:22.0) Gecko/20100101 Firefox/22.0',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 \
-                  (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36',
+            # 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 \
+            #             #       (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36',
+            'User-Agent': self.ua.random(),
         }
         self.terms = []
-        self.oj_set = []
-        self.test_set = []
+        self.oj_set = []  # OJ练习列表 其中第一项是考试
+        self.test_set = []  # 单元测试列表 其中第一项是考试
         self.download_path = "H:/data/"
-        self.ua = random_ua.UserAgent()
 
     def new_headers(self):
         self.headers = {
             'User-Agent': self.ua.random()
         }
-        print(self.headers)
 
     def login(self):
         """
@@ -82,29 +92,11 @@ class DownloadCode(object):
         """
         if not self.cookies:
             print('请先登陆')
-            return 1
-        data = {
-            'callCount': '1',
-            'scriptSessionId': '${scriptSessionId}190',
-            'c0-scriptName': 'PublishCourseBean',
-            'c0-methodName': 'getTermsByTeacher',
-            'c0-id': 0,
-            'c0-param0': 'number:2',
-            'batchId': batch_id()
-        }
+            exit(1)
+        data = GetData.get_term_info()
         host = 'https://www.icourse163.org/dwr/call/plaincall/PublishCourseBean.getTermsByTeacher.dwr'
         req = requests.post(host, headers=self.headers, data=data, cookies=self.cookies)
-        # print(req.text)
-        split = req.text.split('\n')
-
-        for line in split:
-            if line.startswith('s'):
-                term = {
-                    'term': re.findall('s([0-9]+)\.', line)[0],
-                    'term_id': re.findall('s[0-9]+\.termId=([0-9]+)', line)[0],
-                }
-                self.terms.append(term)
-        # print(self.terms)
+        self.terms = GetData.data_manage_term_info(req.text)
         req.close()
         return 0
 
@@ -120,68 +112,27 @@ class DownloadCode(object):
             print('terms没有按照顺序！')
             return 1
         host = 'http://www.icourse163.org/dwr/call/plaincall/MocScoreManagerBean.getMocTermDataStatisticDto.dwr'
-        data = {
-            'callCount': '1',
-            'scriptSessionId': '${scriptSessionId}190',
-            'c0-scriptName': 'MocScoreManagerBean',
-            'c0-methodName': 'getMocTermDataStatisticDto',
-            'c0-id': 0,
-            'c0-param0': 'string: ' + term_id,
-            'batchId': batch_id()
-        }
+        data = GetData.get_moc_data(term_id)
         req = requests.post(host, headers=self.headers, data=data, cookies=self.cookies)
-        c = re.compile('description=.*?;')
-        content = re.sub(c, '', req.text).encode().decode('unicode_escape')  # 转换为中文
-        with open('data/tempGetMocTermDataStatisticDto.dwr', 'wb') as file:
-            file.write(content.encode('utf-8'))
-            file.close()
-        file = open('data/tempGetMocTermDataStatisticDto.dwr', 'rb')
-        for line in file:
-            content = line.decode('utf-8')
-            if re.findall('type=7', content) and re.findall('name=', content):
-                oj_info = {
-                    'name': re.findall('name="(.+?)";', content)[0],
-                    'id': re.findall('id=(.+?);', content)[0] if re.findall('id=(.+?);', content)[0] else '-1',
-                    'chapterId': re.findall('chapterId=(.+?);', content)[0],
-                    'avgScore': re.findall('avgScore=(.+?);', content)[0],
-                    'releaseTime': re.findall('releaseTime=(.+?);', content)[0],
-                    'deadline': re.findall('deadline=(.+?);', content)[0],
-                    'evaluateScoreReleaseTime': re.findall('evaluateScoreReleaseTime=.+;', content)[0],
-                    'sbjTotalScore': re.findall('sbjTotalScore=(.+?);', content)[0],
-                    'termId': re.findall('termId=(.+?);', content)[0],
-                    'submitTestCount': re.findall('submitTestCount=(.+?);', content)[0],
-                    'type': 7,
-                }
-                self.oj_set.append(oj_info)
-            if re.findall('type=2', content) and re.findall('name=', content):
-                print(content)
-                test_info = {
-                    'name': re.findall('name="(.+?)";', content)[0],
-                    'id': re.findall('id=(.+?);', content)[0],
-                    'chapterId': re.findall('chapterId=(.+?);', content)[0],
-                    'avgScore': re.findall('avgScore=(.+?);', content)[0],
-                    'releaseTime': re.findall('releaseTime=(.+?);', content)[0],
-                    'deadline': re.findall('deadline=(.+?);', content)[0],
-                    'evaluateScoreReleaseTime': re.findall('evaluateScoreReleaseTime=(.+?);', content)[0],
-                    'ojTotalScore': re.findall('sbjTotalScore=(.+?);', content)[0],
-                    'termId': re.findall('termId=(.+?);', content)[0],
-                    'submitTestCount': re.findall('submitTestCount=(.+?);', content)[0],
-                    'testRandomSetting': re.findall('testRandomSetting=(.+)', content)[0],
-                    'type': 2,
-
-                }
-                self.test_set.append(test_info)
-        print(self.oj_set)
-        print(self.test_set)
+        self.oj_set, self.test_set = GetData.data_manage_ex_term(req.text)
+        print('编程题', self.oj_set)
+        print('客观题', self.test_set)
         req.close()
 
     def begin_download(self):
+        """
+        根据练习的id找到对应练习的所有的作业
+        :return:
+        :rtype:
+        """
         host = 'http://www.icourse163.org/dwr/call/plaincall/MocScoreManagerBean.getStudentScoresByTestId.dwr'
         term = 1
+        page = 1
+        stu_per_page = 1000
         self.download_path += 'term' + str(term) + '/'
         new_folder(self.download_path)
         self.get_moc_data(term)  # 更新对应学期的课程列表
-        for i in range(1, len(self.oj_set)-1):
+        for i in range(1, len(self.oj_set)):
             oj = self.oj_set[i]
             folder_name = oj['name']
             new_folder(self.download_path+folder_name)
@@ -189,24 +140,17 @@ class DownloadCode(object):
             if term_id == -1:
                 print('terms没有按照顺序！')
                 return 1
-            page = 1
-            data = {
-                'callCount': '1',
-                'scriptSessionId': '${scriptSessionId}190',
-                'c0-scriptName': 'MocScoreManagerBean',
-                'c0-methodName': 'getStudentScoresByTestId',
-                'c0-id': 0,
-                'c0-param0': 'string: ' + str(oj['id']),
-                'c0-param1': 'number:100',
-                'c0-param2': 'number:' + str(page),
-                'c0-param3': 'null:null',
-                'c0-param4': 'number:1',
-                'batchId': batch_id(),
-            }
-            print(data)
+
+            data = GetData.get_oj_by_oj_id(oj['id'], page, stu_per_page)
             req = requests.post(host, headers=self.headers, data=data, cookies=self.cookies)
-            print(req.text)
-            break
+            # 数据处理
+            oj_stu_set = GetData.data_manage_oj_stu(req.text)
+            print(oj_stu_set)
+            print(len(oj_stu_set))
+            req.close()
+            time.sleep(random.randint(1, 10) / 5)
+            # break
+
 
 
     def auto_download(self):
@@ -221,6 +165,5 @@ if __name__ == '__main__':
     download = DownloadCode(account_info)
     download.login()
     download.get_term_info()
-    download.get_moc_data(1)
     time.sleep(1)
     download.begin_download()
