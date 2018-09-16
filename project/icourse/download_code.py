@@ -68,6 +68,7 @@ class DownloadCode(object):
         self.terms = []
         self.oj_set = []  # OJ练习列表 其中第一项是考试
         self.test_set = []  # 单元测试列表 其中第一项是考试
+        self.origin_path = "H:/data/"
         self.download_path = "H:/data/"
 
     def new_headers(self):
@@ -127,7 +128,7 @@ class DownloadCode(object):
             'test_set': self.test_set[1: len(self.test_set)]
         })
 
-    def get_all_test_info(self, term):
+    def get_all_ex_info(self, term):
         """
         根据练习的id找到对应练习的所有的作业
         :param: term
@@ -138,7 +139,7 @@ class DownloadCode(object):
         host = 'http://www.icourse163.org/dwr/call/plaincall/MocScoreManagerBean.getStudentScoresByTestId.dwr'
         page = 1
         stu_per_page = 20
-        self.download_path += 'term' + str(term) + '/'
+        self.download_path = self.origin_path + 'term' + str(term) + '/'
         new_folder(self.download_path)
         self.get_moc_data(term)  # 更新对应学期的课程列表
 
@@ -163,31 +164,35 @@ class DownloadCode(object):
             time.sleep(random.randint(1, 10) / 5)
         return oj_set
 
-    def download(self, term, oj_stu_id):
+    def auto_download(self):
+        term = 1
+        oj_set = self.get_all_ex_info(term)  # 得到该学期所有的oj测试
+        print(oj_set)
+        for oj_stu_set in oj_set:
+            for oj_stu in oj_stu_set:
+                self.download(term, oj_stu)
+                break
+            break
+
+    def download(self, term, oj_stu):
         """
         :param term:
         :type term: int
-        :param oj_stu_id:
-        :type oj_stu_id: complex
+        :param oj_stu:
+        :type oj_stu: dict
         :return:
         :rtype:
         """
         host = 'http://www.icourse163.org/dwr/call/plaincall/YocOJQuizBean.getOJPaperDto.dwr'
-        data = GetData.get_download_data(term, oj_stu_id)
+        data = GetData.get_download_data(term, oj_stu['id'])
         req = requests.post(host, headers=self.headers, data=data, cookies=self.cookies)
-        # print(req.text)
+        code_set = GetData.data_manage_code(req.text)
+        code_set['term'] = term
+        code_set['stuId'] = oj_stu['id']
+        code_set['stuName'] = oj_stu['realName']
+        code_set['stuNickname'] = oj_stu['nickname']
 
-    def auto_download(self):
-        term = 1
-        oj_set = self.get_all_test_info(term)  # 得到该学期所有的oj测试
-        print(oj_set)
-        for oj_stu_set in oj_set:
-            for oj_stu in oj_stu_set:
-                self.download(term, oj_stu['id'])
-                break
-            break
-
-
+    # def write_in(self):
 
 
 
