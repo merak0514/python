@@ -1264,7 +1264,7 @@ class UserAgent(object):
         self.list = js['randomize']
 
     def random(self):
-        a = ra.randint(1, 999)
+        a = ra.randint(1, 960)
         b = self.list[str(a)]
         c = self.browsers[b]  # 选定的浏览器列表
         d = c[ra.randint(0, len(c)-1)]
