@@ -47,8 +47,6 @@ def get_headers():
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 \
                       (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36',
-        'DNT': '1',
-        'Referer': 'https://www.icourse163.org/learn/' + school_id + '-' + course_id + '?tid=' + tid,
     }
     return headers
 
