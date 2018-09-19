@@ -19,4 +19,7 @@ class AutoDownloader(object):
         self.cookies = info['cookies']
         self.headers = info['headers']
         self.stu_info = info['stu_info']
+        self.term = info['term']
         self.download_path = "H:/data/"
+
+
