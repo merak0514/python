@@ -68,8 +68,8 @@ class DownloadCode(object):
         self.terms = []
         self.oj_set = []  # OJ练习列表 其中第一项是考试
         self.test_set = []  # 单元测试列表 其中第一项是考试
-        self.origin_path = "H:/data/"
-        self.download_path = "H:/data/"
+        self.origin_path = "H:/data"
+        self.download_path = "H:/data"
 
     def new_headers(self):
         self.headers = {
@@ -138,16 +138,18 @@ class DownloadCode(object):
         """
         host = 'http://www.icourse163.org/dwr/call/plaincall/MocScoreManagerBean.getStudentScoresByTestId.dwr'
         page = 1
-        stu_per_page = 20
-        self.download_path = self.origin_path + 'term' + str(term) + '/'
+        stu_per_page = 1000
+        self.download_path = '/'.join([self.origin_path, 'term' + str(term)])  # 更新下载目录
         new_folder(self.download_path)
         self.get_moc_data(term)  # 更新对应学期的课程列表
 
         oj_set = []
         for i in range(1, len(self.oj_set)):
             oj = self.oj_set[i]
-            folder_name = oj['name']
-            new_folder(self.download_path+folder_name)
+
+            # folder_name = oj['name']
+            # new_folder('\'.join([self.download_path, folder_name]))
+
             term_id = self.terms[term - 1]['term_id'] if int(self.terms[term - 1]['term']) == int(term) else -1
             if term_id == -1:
                 print('terms没有按照顺序！')
@@ -156,22 +158,23 @@ class DownloadCode(object):
             data = GetData.get_oj_by_oj_id(oj['id'], page, stu_per_page)
             req = requests.post(host, headers=self.headers, data=data, cookies=self.cookies)
             # 数据处理
-            oj_stu_set = GetData.data_manage_oj_stu(req.text)
+            oj_stu_set = GetData.data_manage_oj_stu(req.text, oj_id=oj['id'], oj_name=oj['name'])
             print(oj_stu_set)
             print(len(oj_stu_set))
             oj_set.append(oj_stu_set)
             req.close()
-            time.sleep(random.randint(1, 10) / 5)
+            time.sleep(random.randint(1, 3) / 5)
+            # break
         return oj_set
 
-    def auto_download(self):
+    def auto_download(self, begin=0):
         term = 1
         oj_set = self.get_all_ex_info(term)  # 得到该学期所有的oj测试
         print(oj_set)
         for oj_stu_set in oj_set:
-            for oj_stu in oj_stu_set:
-                self.download(term, oj_stu)
-                break
+            for j in range(begin, len(oj_stu_set)):
+                self.download(term, oj_stu_set[j])
+                # break
             break
 
     def download(self, term, oj_stu):
@@ -185,15 +188,47 @@ class DownloadCode(object):
         """
         host = 'http://www.icourse163.org/dwr/call/plaincall/YocOJQuizBean.getOJPaperDto.dwr'
         data = GetData.get_download_data(term, oj_stu['id'])
+        info = {
+            'term': term,
+            'stuId': oj_stu['id'],
+            'stuName': oj_stu['realName'],
+            'stuNickname': oj_stu['nickname'],
+            'ojName': oj_stu['ojName'],
+            'ojId': oj_stu['ojId'],
+        }
         req = requests.post(host, headers=self.headers, data=data, cookies=self.cookies)
-        code_set = GetData.data_manage_code(req.text)
-        code_set['term'] = term
-        code_set['stuId'] = oj_stu['id']
-        code_set['stuName'] = oj_stu['realName']
-        code_set['stuNickname'] = oj_stu['nickname']
 
-    # def write_in(self):
+        code_dict = GetData.data_manage_code(req.text, info)
+        if not code_dict:
+            return 1
+        req.close()
 
+        file_name = '_'.join([code_dict[0]['stuNickname'], code_dict[0]['stuName']])
+        download_path = '/'.join([self.download_path, code_dict[0]['ojName'], file_name])
+        new_folder(download_path)
+
+        with open('/'.join([download_path, 'information.json']), 'w') as js_file:
+            js = json.dumps(code_dict)
+            js_file.write(js)
+
+        self.write_in(code_dict, download_path)
+        return 0
+
+    def write_in(self, code_dict, path):
+        """
+        在对应的文件夹中写入代码文件
+        :param code_dict:
+        :type code_dict: dict
+        :param path:
+        :type path: str
+        :return:
+        :rtype:
+        """
+        for i in range(5):
+            file = open('/'.join([path, str(i)+'.cpp']), 'wb')
+            file.write(code_dict[i]['code'].encode())
+            file.close()
+        time.sleep(random.randint(1, 5) / 3)
 
 
 if __name__ == '__main__':
@@ -201,4 +236,5 @@ if __name__ == '__main__':
     account_info = get_account()
     download = DownloadCode(account_info)
     download.login()
-    download.auto_download()
+    download.auto_download(begin=490)
+    print('Done!!!!')
