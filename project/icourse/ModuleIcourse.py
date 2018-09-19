@@ -21,11 +21,11 @@ def upload_moc_data(data):
         cursor.execute(sql, (oj['name'], int(oj['id']), 2, float(oj['avgScore']),
                              float(oj['sbjTotalScore']), oj['releaseTime'], oj['deadline']))
     db.commit()
-    print('oj committed')
+    print('OJ uploaded')
     for test in test_set:
         cursor.execute(sql, (test['name'], int(test['id']), 2, float(test['avgScore']),
                              0, test['releaseTime'], test['deadline']))
-    print('test committed')
+    print('Test uploaded')
     db.commit()
     db.close()
     print('Connecting closed')
