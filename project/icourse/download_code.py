@@ -44,7 +44,7 @@ def new_folder(folder_path):
             os.makedirs(folder_path)
         except FileNotFoundError:
             input('系统找不到指定的路径。' + folder_path)
-            return 1
+            exit(1)
         else:
             print('{} created'.format(folder_path))
             return 0
@@ -68,6 +68,7 @@ class DownloadCode(object):
         self.terms = []
         self.oj_set = []  # OJ练习列表 其中第一项是考试
         self.test_set = []  # 单元测试列表 其中第一项是考试
+        self.ex_id_set = []  # 目前单元的所有测试id；完成以单元后清空
         self.origin_path = "H:/data"
         self.download_path = "H:/data"
 
@@ -164,7 +165,7 @@ class DownloadCode(object):
             oj_set.append(oj_stu_set)
             req.close()
             time.sleep(random.randint(1, 3) / 5)
-            # break
+            break
         return oj_set
 
     def auto_download(self, begin=0):
@@ -175,6 +176,8 @@ class DownloadCode(object):
             for j in range(begin, len(oj_stu_set)):
                 self.download(term, oj_stu_set[j])
                 # break
+            self.ex_id_set = []  # 清空
+            print('完成一个学期')
             break
 
     def download(self, term, oj_stu):
@@ -198,7 +201,10 @@ class DownloadCode(object):
         }
         req = requests.post(host, headers=self.headers, data=data, cookies=self.cookies)
 
-        code_dict = GetData.data_manage_code(req.text, info)
+        if not self.ex_id_set:
+            self.ex_id_set = GetData.write_ex_info(req.text, info)
+
+        code_dict = GetData.data_manage_code(req.text, info, self.ex_id_set)
         if not code_dict:
             return 1
         req.close()
@@ -224,11 +230,10 @@ class DownloadCode(object):
         :return:
         :rtype:
         """
-        for i in range(5):
+        for i in range(len(code_dict.keys())):
             file = open('/'.join([path, str(i)+'.cpp']), 'wb')
             file.write(code_dict[i]['code'].encode())
             file.close()
-        time.sleep(random.randint(1, 5) / 3)
 
 
 if __name__ == '__main__':

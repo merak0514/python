@@ -221,7 +221,41 @@ def data_manage_term_info(data):
     return terms
 
 
-def data_manage_code(data, info):
+def write_ex_info(data, info):
+    """
+    :param data:
+    :type data: str
+    :param info:
+    :type info: dict
+    :return:
+    :rtype: list
+    """
+    split = data.split('\n')
+    data_dict = {}
+    for line in split:  # 剪切生成dict
+        if line.startswith('s'):
+            data_dict[re.findall('s[0-9]+', line)[0]] = line
+    ex_set = re.findall('[0-4]\]=(s[0-9]+)', data_dict['s2'])
+    all_info_set = []
+    ex_id_set = []
+    for i in range(5):
+        temp = {
+            'id': re.findall('id=([0-9]+)', data_dict[ex_set[i]])[0],
+            'title': re.findall('title="(.+)"', data_dict[ex_set[i]])[0].encode().decode('unicode_escape'),
+            'score': re.findall('score=([0-9]+)', data_dict[ex_set[i]])[0],
+            'timeLimit': re.findall('ojTimeLimit=([0-9]+)', data_dict[ex_set[i]])[0],
+            'memoryLimit': re.findall('ojMemLimit=([0-9]+)', data_dict[ex_set[i]])[0],
+            'description': re.findall('description="(.+)";', data_dict[ex_set[i]])[0],
+        }
+        all_info_set.append(temp)
+        ex_id_set.append(temp['id'])
+    with open('/'.join(['H://data', 'term'+str(info['term']), 'info', info['ojName']+'.json']), 'w') as file:
+        js = json.dumps(all_info_set)
+        file.write(js)
+    return ex_id_set
+
+
+def data_manage_code(data, info, ex_id_set):
     """
     :param data:
     :type data: str
@@ -237,35 +271,27 @@ def data_manage_code(data, info):
         if line.startswith('s'):
             data_dict[re.findall('s[0-9]+', line)[0]] = line
 
-    # 题目信息存入文件
-    sign_set = re.findall('[0-4]\]=(s[0-9]+)', data_dict['s2'])
-    ex_id_set = []
-    for i in range(5):
-        data = {
-            'id': re.findall('id=([0-9]+)', data_dict[sign_set[i]])[0],
-            'title': re.findall('title="(.+)"', data_dict[sign_set[i]])[0].encode().decode('unicode_escape'),
-            'score': re.findall('score=([0-9]+)', data_dict[sign_set[i]])[0],
-            'timeLimit': re.findall('ojTimeLimit=([0-9]+)', data_dict[sign_set[i]])[0],
-            'memoryLimit': re.findall('ojMemLimit=([0-9]+)', data_dict[sign_set[i]])[0],
-            'content': re.findall('content="(.+>)";', data_dict[sign_set[i]])[0],
-        }
-        ex_id_set[i+1] = ()
-    with open('/'.join(['H://data', 'term'+info['term'], 'info', info['ojName']+'.json']), 'w') as file:
-        js = json.dumps(sign_set)
-        file.write(js)
+    data_dict.pop('s2')
     # sign_set = ['s3', 's4', 's5', 's6', 's7']
 
-    print(data_dict)
-    print(info)
-    for iteration in range(5):  # 5份答案
+    sign_set = []
+    for ex_id in ex_id_set:
+        for sign in data_dict.keys():
+            if data_dict[sign].find(str(ex_id)) is not -1:
+                # print(data_dict[sign])
+                if int(re.findall('s([0-9]+)', sign)[0]) < 10:
+                    sign_set.append(sign)
+                    break
+    # print(sign_set)
+
+    for iteration in range(len(sign_set)):  # 5份答案
         i = sign_set[iteration]
-        print(data_dict[i])
-        try:
-            sign2 = re.findall('content=(s[0-9]+);', data_dict[i])[0]
-        except IndexError:
-            code = re.findall('content="(.+})"', data_dict[i])[0]
-        else:
-            code = re.findall('content="(.+})"', data_dict[sign2])[0]
+        # try:
+        sign2 = re.findall('content=(s[0-9]+);', data_dict[i])[0]
+        # except IndexError:
+        #     code = re.findall('content="(.+})"', data_dict[i])[0]
+        # else:
+        code = re.findall('content="(.+})"', data_dict[sign2])[0]
         code = replace(code)
         sign3 = re.findall('ojResultDto=(s[0-9]+);', data_dict[i])[0]
 
