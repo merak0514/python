@@ -7,6 +7,22 @@
 import json
 import time
 import re
+import json
+
+
+def replace(a):
+    """
+    格式化
+    :param a:
+    :type a: str
+    :return:
+    :rtype:
+    """
+    a = a.replace('\\n', '\n')
+    a = a.replace('\\t', '\t')
+    a = a.replace('\\"', '\"')
+    a = a.replace("\\'", "\'")
+    return a
 
 
 def batch_id():
@@ -220,37 +236,60 @@ def data_manage_code(data, info):
     for line in split:  # 剪切生成dict
         if line.startswith('s'):
             data_dict[re.findall('s[0-9]+', line)[0]] = line
-    sign_set = ['s3', 's4', 's5', 's6', 's7']
+
+    # 题目信息存入文件
+    sign_set = re.findall('[0-4]\]=(s[0-9]+)', data_dict['s2'])
+    ex_id_set = []
+    for i in range(5):
+        data = {
+            'id': re.findall('id=([0-9]+)', data_dict[sign_set[i]])[0],
+            'title': re.findall('title="(.+)"', data_dict[sign_set[i]])[0].encode().decode('unicode_escape'),
+            'score': re.findall('score=([0-9]+)', data_dict[sign_set[i]])[0],
+            'timeLimit': re.findall('ojTimeLimit=([0-9]+)', data_dict[sign_set[i]])[0],
+            'memoryLimit': re.findall('ojMemLimit=([0-9]+)', data_dict[sign_set[i]])[0],
+            'content': re.findall('content="(.+>)";', data_dict[sign_set[i]])[0],
+        }
+        ex_id_set[i+1] = ()
+    with open('/'.join(['H://data', 'term'+info['term'], 'info', info['ojName']+'.json']), 'w') as file:
+        js = json.dumps(sign_set)
+        file.write(js)
+    # sign_set = ['s3', 's4', 's5', 's6', 's7']
+
+    print(data_dict)
+    print(info)
     for iteration in range(5):  # 5份答案
         i = sign_set[iteration]
+        print(data_dict[i])
         try:
             sign2 = re.findall('content=(s[0-9]+);', data_dict[i])[0]
-            sign3 = re.findall('ojResultDto=(s[0-9]+);', data_dict[i])[0]
+        except IndexError:
+            code = re.findall('content="(.+})"', data_dict[i])[0]
+        else:
             code = re.findall('content="(.+})"', data_dict[sign2])[0]
-            code = code.replace('\\n', '\n')
-            code = code.replace('\\t', '\t')
-            code = code.replace('\\"', '\"')
-            code = code.replace("\\'", "\'")
-            code_info = {
-                'answerTimes': re.findall('answerTimes=([0-9]+);', data_dict[i])[0],
-                'score': re.findall('score=([0-9]+);', data_dict[i])[0],
-                'code': code,  # 【可能有问题】
-                'term': info['term'],
-                'stuId': info['stuId'],
-                'stuName': info['stuName'],
-                'stuNickname': info['stuNickname'],
-                'ojName': info['ojName'],
-                'ojId': info['ojId'],
-            }
-            sign4 = re.findall('=(s[0-9]+);', data_dict[sign3])[0]
-            sign5 = re.findall('=(s[0-9]+);', data_dict[sign4])[0]
-            code_info['result'] = re.findall('result="(.+)";', data_dict[sign5])[0]
-            code_info_dict[iteration] = code_info
-        except IndexError as e:
-            print('该数据有误')
-            print(e)
-            print(data_dict)
-            with open('H:/data/error/error.txt', 'a') as file:
-                file.write(json.dumps(data_dict))
-            return {}
+        code = replace(code)
+        sign3 = re.findall('ojResultDto=(s[0-9]+);', data_dict[i])[0]
+
+        code_info = {
+            'answerTimes': re.findall('answerTimes=([0-9]+);', data_dict[i])[0],
+            'score': re.findall('score=([0-9]+);', data_dict[i])[0],
+            'code': code,  # 【可能有问题】
+            'term': info['term'],
+            'stuId': info['stuId'],
+            'stuName': info['stuName'],
+            'stuNickname': info['stuNickname'],
+            'ojName': info['ojName'],
+            'ojId': info['ojId'],
+        }
+        sign4 = re.findall('=(s[0-9]+);', data_dict[sign3])[0]
+        sign5 = re.findall('=(s[0-9]+);', data_dict[sign4])[0]
+        code_info['result'] = re.findall('result="(.+)";', data_dict[sign5])[0]
+        code_info['usedMemory'] = re.findall('usedMemory=(.+);', data_dict[sign5])[0]
+        code_info_dict[iteration] = code_info
+        # except IndexError as e:
+        #     print('该数据有误')
+        #     print(e)
+        #     print(data_dict)
+        #     with open('H:/data/error/error.txt', 'a') as file:
+        #         file.write(json.dumps(data_dict))
+        #     return {}
     return code_info_dict
