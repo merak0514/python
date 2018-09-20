@@ -165,20 +165,21 @@ class DownloadCode(object):
             oj_set.append(oj_stu_set)
             req.close()
             time.sleep(random.randint(1, 3) / 5)
-            break
+            # break
         return oj_set
 
     def auto_download(self, begin=0):
         term = 1
         oj_set = self.get_all_ex_info(term)  # 得到该学期所有的oj测试
         print(oj_set)
+        # input('你确定要开始下载【所有的】代码吗？')
         for oj_stu_set in oj_set:
             for j in range(begin, len(oj_stu_set)):
                 self.download(term, oj_stu_set[j])
                 # break
             self.ex_id_set = []  # 清空
-            print('完成一个学期')
-            break
+            print('完成一份作业')
+            # break
 
     def download(self, term, oj_stu):
         """
@@ -208,9 +209,8 @@ class DownloadCode(object):
         if not code_dict:
             return 1
         req.close()
-
-        file_name = '_'.join([code_dict[0]['stuNickname'], code_dict[0]['stuName']])
-        download_path = '/'.join([self.download_path, code_dict[0]['ojName'], file_name])
+        file_name = '_'.join([info['stuNickname'], info['stuName']])
+        download_path = '/'.join([self.download_path, info['ojName'], file_name])
         new_folder(download_path)
 
         with open('/'.join([download_path, 'information.json']), 'w') as js_file:
@@ -230,7 +230,7 @@ class DownloadCode(object):
         :return:
         :rtype:
         """
-        for i in range(len(code_dict.keys())):
+        for i in code_dict.keys():
             file = open('/'.join([path, str(i)+'.cpp']), 'wb')
             file.write(code_dict[i]['code'].encode())
             file.close()
@@ -241,5 +241,5 @@ if __name__ == '__main__':
     account_info = get_account()
     download = DownloadCode(account_info)
     download.login()
-    download.auto_download(begin=490)
+    download.auto_download()
     print('Done!!!!')

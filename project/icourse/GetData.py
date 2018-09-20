@@ -274,24 +274,32 @@ def data_manage_code(data, info, ex_id_set):
     data_dict.pop('s2')
     # sign_set = ['s3', 's4', 's5', 's6', 's7']
 
-    sign_set = []
-    for ex_id in ex_id_set:
+    sign_dict = {}
+    for i in range(len(ex_id_set)):
+        ex_id = ex_id_set[i]
         for sign in data_dict.keys():
             if data_dict[sign].find(str(ex_id)) is not -1:
                 # print(data_dict[sign])
-                if int(re.findall('s([0-9]+)', sign)[0]) < 10:
-                    sign_set.append(sign)
+                if int(re.findall('s([0-9]+)', sign)[0]) < 8:
+                    sign_dict[i] = sign
                     break
     # print(sign_set)
 
-    for iteration in range(len(sign_set)):  # 5份答案
-        i = sign_set[iteration]
+    for iteration in sign_dict.keys():  # n份答案
+        i = sign_dict[iteration]
         # try:
         sign2 = re.findall('content=(s[0-9]+);', data_dict[i])[0]
         # except IndexError:
         #     code = re.findall('content="(.+})"', data_dict[i])[0]
         # else:
-        code = re.findall('content="(.+})"', data_dict[sign2])[0]
+        try:
+            code = re.findall('content="(.+})"', data_dict[sign2])[0]
+        except IndexError:
+            print("应该是content没有}，无解")
+            print(data_dict)
+            with open('H:/data/error/error.txt', 'a') as file:
+                file.write(json.dumps(data_dict))
+            return {}
         code = replace(code)
         sign3 = re.findall('ojResultDto=(s[0-9]+);', data_dict[i])[0]
 
@@ -306,16 +314,18 @@ def data_manage_code(data, info, ex_id_set):
             'ojName': info['ojName'],
             'ojId': info['ojId'],
         }
-        sign4 = re.findall('=(s[0-9]+);', data_dict[sign3])[0]
-        sign5 = re.findall('=(s[0-9]+);', data_dict[sign4])[0]
-        code_info['result'] = re.findall('result="(.+)";', data_dict[sign5])[0]
-        code_info['usedMemory'] = re.findall('usedMemory=(.+);', data_dict[sign5])[0]
+        try:
+            sign4 = re.findall('=(s[0-9]+);', data_dict[sign3])[0]
+            sign5 = re.findall('=(s[0-9]+);', data_dict[sign4])[0]
+            code_info['result'] = re.findall('result="(.+?)";', data_dict[sign5])[0]
+            code_info['usedMemory'] = re.findall('usedMemory=(.+);', data_dict[sign5])[0]
+        except:
+            print('该数据有误')
+            code_info['result'] = ''
+            code_info['usedMemory'] = -1
+            print(data_dict)
+            with open('H:/data/error/error.txt', 'a') as file:
+                file.write(json.dumps(data_dict))
         code_info_dict[iteration] = code_info
-        # except IndexError as e:
-        #     print('该数据有误')
-        #     print(e)
-        #     print(data_dict)
-        #     with open('H:/data/error/error.txt', 'a') as file:
-        #         file.write(json.dumps(data_dict))
-        #     return {}
+    # print(code_info_dict)
     return code_info_dict
