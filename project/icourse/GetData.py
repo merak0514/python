@@ -287,11 +287,13 @@ def data_manage_code(data, info, ex_id_set):
 
     for iteration in sign_dict.keys():  # n份答案
         i = sign_dict[iteration]
-        # try:
-        sign2 = re.findall('content=(s[0-9]+);', data_dict[i])[0]
-        # except IndexError:
-        #     code = re.findall('content="(.+})"', data_dict[i])[0]
-        # else:
+        # print(data_dict)
+        # print(data_dict[i])
+        try:
+            sign2 = re.findall('content=(s[0-9]+);', data_dict[i])[0]
+        except IndexError:
+            print('s<8')
+            break
         try:
             code = re.findall('content="(.+})"', data_dict[sign2])[0]
         except IndexError:
@@ -299,7 +301,7 @@ def data_manage_code(data, info, ex_id_set):
             print(data_dict)
             with open('H:/data/error/error.txt', 'a') as file:
                 file.write(json.dumps(data_dict))
-            return {}
+            break
         code = replace(code)
         sign3 = re.findall('ojResultDto=(s[0-9]+);', data_dict[i])[0]
 

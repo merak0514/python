@@ -60,12 +60,9 @@ class DownloadCode(object):
         self.is_login = 0
         self.cookies = ''
         self.headers = {
-            # 'User-Agent': 'Mozilla/5.0 (Windows NT 6.2; WOW64; rv:22.0) Gecko/20100101 Firefox/22.0',
-            # 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 \
-            #             #       (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36',
             'User-Agent': self.ua.random(),
         }
-        self.terms = []
+        self.terms = []  # term列表
         self.oj_set = []  # OJ练习列表 其中第一项是考试
         self.test_set = []  # 单元测试列表 其中第一项是考试
         self.ex_id_set = []  # 目前单元的所有测试id；完成以单元后清空
@@ -105,18 +102,14 @@ class DownloadCode(object):
         req.close()
         return 0
 
-    def get_moc_data(self, term):
+    def get_moc_data(self, term_id):
         """
-        根据输入的学期查询所有的练习
-        :param term: 第几学期
-        :type term: int
+        根据输入的学期id查询所有的练习
+        :param term_id: 第几学期的id
+        :type term_id: int
         :return: req.text if success else 1
         """
-        self.get_term_info()  # 更新学期列表
-        term_id = self.terms[term-1]['term_id'] if int(self.terms[term-1]['term']) == int(term) else -1
-        if term_id == -1:
-            print('terms没有按照顺序！')
-            return 1
+
         host = 'http://www.icourse163.org/dwr/call/plaincall/MocScoreManagerBean.getMocTermDataStatisticDto.dwr'
         data = GetData.get_moc_data(term_id)
         req = requests.post(host, headers=self.headers, data=data, cookies=self.cookies)
@@ -124,38 +117,42 @@ class DownloadCode(object):
         print('编程题', self.oj_set)
         print('客观题', self.test_set)
         req.close()
-        ModuleIcourse.upload_moc_data({  # 上传数据库
-            'oj_set': self.oj_set[1: len(self.oj_set)],
-            'test_set': self.test_set[1: len(self.test_set)]
-        })
+        try:
+            ModuleIcourse.upload_moc_data({  # 上传数据库
+                'oj_set': self.oj_set[1: len(self.oj_set)],
+                'test_set': self.test_set[1: len(self.test_set)]
+            })
+        except:
+            print("数据库未连接")
 
-    def get_all_ex_info(self, term):
+    def get_all_ex_info(self, term, start=0):
         """
-        根据练习的id找到对应练习的所有的作业
+        根据单元的id找到对应单元的所有的练习
         :param: term
+        :type: int
+        :param: start: 开始的单元
         :type: int
         :return: oj_set
         :rtype: list
         """
+        term_id = self.terms[term-1]['term_id'] if int(self.terms[term-1]['term']) == int(term) else -1
+        if term_id == -1:
+            print('terms没有按照顺序！')
+            return 1
+
         host = 'http://www.icourse163.org/dwr/call/plaincall/MocScoreManagerBean.getStudentScoresByTestId.dwr'
         page = 1
+        # 每页显示的学生数量
         stu_per_page = 1000
+
         self.download_path = '/'.join([self.origin_path, 'term' + str(term)])  # 更新下载目录
         new_folder(self.download_path)
-        self.get_moc_data(term)  # 更新对应学期的课程列表
+        new_folder(self.download_path + '/info')
+        self.get_moc_data(term_id)  # 更新对应学期的课程列表
 
         oj_set = []
-        for i in range(1, len(self.oj_set)):
+        for i in range(start+1, len(self.oj_set)):
             oj = self.oj_set[i]
-
-            # folder_name = oj['name']
-            # new_folder('\'.join([self.download_path, folder_name]))
-
-            term_id = self.terms[term - 1]['term_id'] if int(self.terms[term - 1]['term']) == int(term) else -1
-            if term_id == -1:
-                print('terms没有按照顺序！')
-                return 1
-
             data = GetData.get_oj_by_oj_id(oj['id'], page, stu_per_page)
             req = requests.post(host, headers=self.headers, data=data, cookies=self.cookies)
             # 数据处理
@@ -168,17 +165,21 @@ class DownloadCode(object):
             # break
         return oj_set
 
-    def auto_download(self, begin=0):
-        term = 1
-        oj_set = self.get_all_ex_info(term)  # 得到该学期所有的oj测试
-        print(oj_set)
-        # input('你确定要开始下载【所有的】代码吗？')
-        for oj_stu_set in oj_set:
-            for j in range(begin, len(oj_stu_set)):
-                self.download(term, oj_stu_set[j])
+    def auto_download(self, start_term=1, start_unit=0, start_stu=0):
+        self.get_term_info()  # 更新学期列表
+        for i in range(start_term-1, len(self.terms)):
+            term = self.terms[i]['term']
+            oj_set = self.get_all_ex_info(int(term), start_unit)  # 得到该学期所有的oj测试
+            print(oj_set)
+            # input('你确定要开始下载【所有的】代码吗？按任意键继续：')
+            for oj_stu_set in oj_set:
+                for j in range(start_stu, len(oj_stu_set)):
+                    self.download(term, oj_stu_set[j])
+                    # break
+                self.ex_id_set = []  # 清空
+                print('完成一份作业')
                 # break
-            self.ex_id_set = []  # 清空
-            print('完成一份作业')
+            print('完成第{}学期'.format(str(term)))
             # break
 
     def download(self, term, oj_stu):
@@ -187,8 +188,6 @@ class DownloadCode(object):
         :type term: int
         :param oj_stu:
         :type oj_stu: dict
-        :return:
-        :rtype:
         """
         host = 'http://www.icourse163.org/dwr/call/plaincall/YocOJQuizBean.getOJPaperDto.dwr'
         data = GetData.get_download_data(term, oj_stu['id'])
@@ -237,9 +236,10 @@ class DownloadCode(object):
 
 
 if __name__ == '__main__':
-    #
     account_info = get_account()
     download = DownloadCode(account_info)
     download.login()
-    download.auto_download()
+
+    # 在此处设置开始的学期和学生
+    download.auto_download(start_term=6, start_unit=9, start_stu=0)
     print('Done!!!!')
